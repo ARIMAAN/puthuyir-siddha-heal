@@ -13,71 +13,150 @@ import {
   ArrowRight,
   CheckCircle2
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+// Services page translations
+const servicesTranslations = {
+  en: {
+    title: "Services",
+    subtitle: "Comprehensive Siddha therapies for your needs",
+    consultationModesTitle: "Choose Your Consultation Mode",
+    consultationModesDesc: "Connect with Dr. Dhivyadhashini in your preferred way",
+    chat: "Chat Consultation",
+    chatDesc: "Text-based consultation for detailed discussions at your convenience",
+    audio: "Audio Call Consultation",
+    audioDesc: "Voice consultation for personal connection and guidance",
+    video: "Video Call Consultation",
+    videoDesc: "Face-to-face consultation for thorough assessment",
+    additionalSupportTitle: "Additional Support",
+    additionalSupportDesc: "Holistic care beyond consultation",
+    ePrescription: "E-Prescription",
+    ePrescriptionDesc: "Digital prescription accessible anytime",
+    medicineDelivery: "Medicine Delivery",
+    medicineDeliveryDesc: "Home delivery of authentic Siddha medicines",
+    followup: "Follow-up System",
+    followupDesc: "Regular follow-ups to track progress",
+    lifestyle: "Lifestyle & Diet Guidance",
+    lifestyleDesc: "Personalized recommendations for holistic wellness",
+    processTitle: "How It Works",
+    processDesc: "Simple steps to start your healing journey",
+    step1: "Book Online",
+    step1Desc: "Choose your preferred time and consultation mode",
+    step2: "Consultation",
+    step2Desc: "Share symptoms, medical history, and reports",
+    step3: "Receive Care",
+    step3Desc: "Get e-prescription and medicines delivered",
+    whyChooseTitle: "Why Puthuyir?",
+    whyChoose: [
+      "Faster recovery and lasting results",
+      "Affordable treatments with no side effects",
+      "Herbal and high-quality products",
+      "Focus on holistic wellness, not just symptoms",
+    ],
+    bookNow: "Book Your Consultation",
+  },
+  ta: {
+    title: "சேவைகள்",
+    subtitle: "உங்கள் தேவைகளுக்கான விரிவான சித்த சிகிச்சைகள்",
+    consultationModesTitle: "உங்கள் ஆலோசனை முறையைத் தேர்ந்தெடுக்கவும்",
+    consultationModesDesc: "உங்களுக்கு ஏற்ற முறையில் டாக்டர் திவ்யதர்சினியுடன் இணைக",
+    chat: "அரட்டை ஆலோசனை",
+    chatDesc: "உங்களுக்கு வசதியாக விரிவான விவாதங்களுக்கு உரை அடிப்படையிலான ஆலோசனை",
+    audio: "ஆடியோ அழைப்பு ஆலோசனை",
+    audioDesc: "தனிப்பட்ட தொடர்புக்கும் வழிகாட்டலுக்கும் குரல் ஆலோசனை",
+    video: "வீடியோ அழைப்பு ஆலோசனை",
+    videoDesc: "முழுமையான மதிப்பீட்டிற்கான நேருக்கு நேர் ஆலோசனை",
+    additionalSupportTitle: "கூடுதல் ஆதரவு",
+    additionalSupportDesc: "ஆலோசனைக்கு அப்பாலும் முழுமையான பராமரிப்பு",
+    ePrescription: "மின் பரிந்துரை",
+    ePrescriptionDesc: "எப்போது வேண்டுமானாலும் அணுகக்கூடிய டிஜிட்டல் பரிந்துரை",
+    medicineDelivery: "மருந்து விநியோகம்",
+    medicineDeliveryDesc: "அசல் சித்த மருந்துகளின் வீட்டு வாசல் விநியோகம்",
+    followup: "பின்தொடர்பு அமைப்பு",
+    followupDesc: "முன்னேற்றத்தை கண்காணிக்க வழக்கமான பின்தொடர்பு",
+    lifestyle: "வாழ்க்கைமுறை மற்றும் உணவு வழிகாட்டுதல்",
+    lifestyleDesc: "முழுமையான நலனுக்கான தனிப்பட்ட பரிந்துரைகள்",
+    processTitle: "எப்படி செயல்படுகிறது",
+    processDesc: "உங்கள் குணப்படுத்தும் பயணத்தைத் தொடங்க எளிய படிகள்",
+    step1: "ஆன்லைன் பதிவு செய்யவும்",
+    step1Desc: "உங்கள் விருப்பமான நேரமும் ஆலோசனை முறையும் தேர்ந்தெடுக்கவும்",
+    step2: "ஆலோசனை",
+    step2Desc: "அறிகுறிகள், மருத்துவ வரலாறு மற்றும் அறிக்கைகளை பகிரவும்",
+    step3: "பராமரிப்பு பெறுங்கள்",
+    step3Desc: "மின் பரிந்துரை மற்றும் மருந்துகளைப் பெறுங்கள்",
+    whyChooseTitle: "ஏன் புத்துயிர்?",
+    whyChoose: [
+      "விரைவான குணமடைதலும் நீடித்த முடிவுகளும்",
+      "பக்கவிளைவுகள் இல்லாமல் மலிவான சிகிச்சைகள்",
+      "மூலிகை மற்றும் உயர்தர தயாரிப்புகள்",
+      "அறிகுறிகள் மட்டுமல்ல, முழுமையான நலனில் கவனம்",
+    ],
+    bookNow: "உங்கள் ஆலோசனையை பதிவு செய்யுங்கள்",
+  },
+};
 
 const Services = () => {
+  const { language } = useLanguage();
+  const t = servicesTranslations[language];
+
   const consultationModes = [
     {
       icon: MessageSquare,
-      title: "Chat Consultation",
-      description: "Text-based consultation for detailed discussions at your convenience"
+      title: t.chat,
+      description: t.chatDesc
     },
     {
       icon: Phone,
-      title: "Audio Call Consultation",
-      description: "Voice consultation for personal interaction and guidance"
+      title: t.audio,
+      description: t.audioDesc
     },
     {
       icon: Video,
-      title: "Video Call Consultation",
-      description: "Face-to-face virtual consultation for comprehensive assessment"
+      title: t.video,
+      description: t.videoDesc
     }
   ];
 
   const additionalServices = [
     {
       icon: FileText,
-      title: "E-Prescription",
-      description: "Digital prescription accessible anytime"
+      title: t.ePrescription,
+      description: t.ePrescriptionDesc
     },
     {
       icon: Truck,
-      title: "Medicine Delivery",
-      description: "Doorstep delivery of authentic Siddha medicines"
+      title: t.medicineDelivery,
+      description: t.medicineDeliveryDesc
     },
     {
       icon: RefreshCw,
-      title: "Follow-up System",
-      description: "Regular check-ins to monitor progress"
+      title: t.followup,
+      description: t.followupDesc
     },
     {
       icon: Book,
-      title: "Lifestyle & Diet Guidance",
-      description: "Personalized recommendations for holistic wellness"
+      title: t.lifestyle,
+      description: t.lifestyleDesc
     }
   ];
 
-  const whyChooseUs = [
-    "Fast recovery & long-term results",
-    "Affordable treatments without side effects",
-    "Herbal & high-order formulations",
-    "Focus on total wellness, not just symptom relief"
-  ];
+  const whyChooseUs = t.whyChoose;
 
   const process = [
     {
       step: "1",
-      title: "Book Online",
-      description: "Choose your preferred time and consultation mode"
+      title: t.step1,
+      description: t.step1Desc
     },
     {
       step: "2",
-      title: "Consultation",
-      description: "Share symptoms, medical history, and reports"
+      title: t.step2,
+      description: t.step2Desc
     },
     {
       step: "3",
-      title: "Receive Care",
-      description: "Get e-prescription & medicines delivered"
+      title: t.step3,
+      description: t.step3Desc
     }
   ];
 
@@ -86,9 +165,9 @@ const Services = () => {
         {/* Hero */}
         <section className="py-20 bg-gradient-to-br from-muted/50 to-background">
           <div className="container mx-auto px-4 text-center space-y-6 animate-fade-in">
-            <h1 className="text-5xl font-bold text-foreground">Our Siddha Consultation Services</h1>
+            <h1 className="text-5xl font-bold text-foreground">{t.title}</h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              We provide personalized consultations and Siddha-based therapies tailored to your unique health needs.
+              {t.subtitle}
             </p>
           </div>
         </section>
@@ -97,8 +176,8 @@ const Services = () => {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-foreground mb-4">Choose Your Consultation Mode</h2>
-              <p className="text-muted-foreground">Connect with Dr. Dhivyadhashini in the way that suits you best</p>
+              <h2 className="text-4xl font-bold text-foreground mb-4">{t.consultationModesTitle}</h2>
+              <p className="text-muted-foreground">{t.consultationModesDesc}</p>
             </div>
             
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -121,8 +200,8 @@ const Services = () => {
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-foreground mb-4">Additional Support</h2>
-              <p className="text-muted-foreground">Comprehensive care beyond consultation</p>
+              <h2 className="text-4xl font-bold text-foreground mb-4">{t.additionalSupportTitle}</h2>
+              <p className="text-muted-foreground">{t.additionalSupportDesc}</p>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -145,8 +224,8 @@ const Services = () => {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-foreground mb-4">How It Works</h2>
-              <p className="text-muted-foreground">Simple steps to begin your healing journey</p>
+              <h2 className="text-4xl font-bold text-foreground mb-4">{t.processTitle}</h2>
+              <p className="text-muted-foreground">{t.processDesc}</p>
             </div>
             
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -174,9 +253,9 @@ const Services = () => {
         <section className="py-16 bg-gradient-to-br from-primary to-accent text-primary-foreground">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-4xl font-bold text-center mb-12">Why Choose Puthuyir?</h2>
+              <h2 className="text-4xl font-bold text-center mb-12">{t.whyChooseTitle}</h2>
               <div className="grid md:grid-cols-2 gap-6">
-                {whyChooseUs.map((reason, index) => (
+                {whyChooseUs.map((reason: string, index: number) => (
                   <div key={index} className="flex items-start gap-3">
                     <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-1" />
                     <p className="text-lg">{reason}</p>
@@ -187,7 +266,7 @@ const Services = () => {
                 <Button asChild size="lg" variant="secondary" className="shadow-lg">
                   <Link to="/book-appointment">
                     <Calendar className="mr-2 w-5 h-5" />
-                    Book Your Consultation
+                    {t.bookNow}
                   </Link>
                 </Button>
               </div>

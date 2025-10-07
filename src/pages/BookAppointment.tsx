@@ -7,8 +7,52 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { MessageSquare, Phone, Video, Calendar, Clock, User, Mail, FileText } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+// BookAppointment page translations
+const consultationTranslations = {
+  en: {
+    title: "Book Online Consultation",
+    subtitle: "Book your personalized Siddha consultation now",
+    name: "Name",
+    age: "Age",
+    gender: "Gender",
+    phone: "Phone Number",
+    email: "Email",
+    symptoms: "Your Symptoms",
+    preferredDate: "Preferred Date",
+    preferredTime: "Preferred Time",
+    submit: "Submit",
+    success: "Your appointment has been booked successfully!",
+    error: "Failed to book appointment. Please try again.",
+    chat: "Chat Consultation",
+    audio: "Audio Call",
+    video: "Video Call",
+  },
+  ta: {
+    title: "ஆன்லைன் ஆலோசனை பதிவு செய்யுங்கள்",
+    subtitle: "உங்கள் தனிப்பட்ட சித்த ஆலோசனையை இப்போது பதிவு செய்யுங்கள்",
+    name: "பெயர்",
+    age: "வயது",
+    gender: "பாலினம்",
+    phone: "தொலைபேசி எண்",
+    email: "மின்னஞ்சல்",
+    symptoms: "உங்கள் அறிகுறிகள்",
+    preferredDate: "விருப்பமான தேதி",
+    preferredTime: "விருப்பமான நேரம்",
+    submit: "பதிவுசெய்யவும்",
+    success: "உங்கள் ஆலோசனை பதிவு வெற்றிகரமாக செய்யப்பட்டது!",
+    error: "பதிவைச் செய்ய முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    chat: "அரட்டை ஆலோசனை",
+    audio: "ஆடியோ அழைப்பு",
+    video: "வீடியோ அழைப்பு",
+  },
+};
 
 const BookAppointment = () => {
+  const { language } = useLanguage();
+  const t = consultationTranslations[language];
+
   const [consultationType, setConsultationType] = useState("chat");
   const [formData, setFormData] = useState({
     name: "",
@@ -27,7 +71,7 @@ const BookAppointment = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Consultation request submitted! We'll contact you shortly.");
+    toast.success(t.success);
     // Reset form
     setFormData({
       name: "",
@@ -51,9 +95,9 @@ const BookAppointment = () => {
         {/* Hero */}
         <section className="py-20 bg-gradient-to-br from-muted/50 to-background">
           <div className="container mx-auto px-4 text-center space-y-6 animate-fade-in">
-            <h1 className="text-5xl font-bold text-foreground">Book a Consultation</h1>
+            <h1 className="text-5xl font-bold text-foreground">{t.title}</h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Your health journey begins with one conversation. Book a consultation to receive personalized Siddha guidance.
+              {t.subtitle}
             </p>
           </div>
         </section>
@@ -98,24 +142,24 @@ const BookAppointment = () => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <User className="w-5 h-5 text-primary" />
-                        Personal Information
+                        {t.name}
                       </h3>
                       
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Full Name *</Label>
+                          <Label htmlFor="name">{t.name} *</Label>
                           <Input
                             id="name"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            placeholder="Enter your name"
+                            placeholder={t.name}
                             required
                           />
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="phone">Phone Number *</Label>
+                          <Label htmlFor="phone">{t.phone} *</Label>
                           <Input
                             id="phone"
                             name="phone"
@@ -129,7 +173,7 @@ const BookAppointment = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email Address *</Label>
+                        <Label htmlFor="email">{t.email} *</Label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                           <Input
@@ -150,12 +194,12 @@ const BookAppointment = () => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-primary" />
-                        Preferred Schedule
+                        {t.preferredDate}
                       </h3>
                       
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="preferredDate">Preferred Date *</Label>
+                          <Label htmlFor="preferredDate">{t.preferredDate} *</Label>
                           <Input
                             id="preferredDate"
                             name="preferredDate"
@@ -168,7 +212,7 @@ const BookAppointment = () => {
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="preferredTime">Preferred Time *</Label>
+                          <Label htmlFor="preferredTime">{t.preferredTime} *</Label>
                           <div className="relative">
                             <Clock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -189,33 +233,33 @@ const BookAppointment = () => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <FileText className="w-5 h-5 text-primary" />
-                        Health Details
+                        {t.symptoms}
                       </h3>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="symptoms">Symptoms & Medical History *</Label>
+                        <Label htmlFor="symptoms">{t.symptoms} *</Label>
                         <Textarea
                           id="symptoms"
                           name="symptoms"
                           value={formData.symptoms}
                           onChange={handleChange}
-                          placeholder="Please describe your symptoms, health concerns, and any relevant medical history..."
+                          placeholder={t.symptoms}
                           className="min-h-32"
                           required
                         />
                         <p className="text-sm text-muted-foreground">
-                          You can also upload reports during the consultation
+                          {/* You can also upload reports during the consultation */}
                         </p>
                       </div>
                     </div>
 
                     {/* Submit */}
                     <Button type="submit" size="lg" className="w-full">
-                      Book Consultation
+                      {t.submit}
                     </Button>
 
                     <p className="text-sm text-center text-muted-foreground">
-                      By booking, you agree to receive communication regarding your consultation
+                      {/* By booking, you agree to receive communication regarding your consultation */}
                     </p>
                   </form>
                 </CardContent>

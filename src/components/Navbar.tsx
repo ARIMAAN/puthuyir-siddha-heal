@@ -3,13 +3,34 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Leaf, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { translations } from "@/data/translations";
+
+// Navbar translations directly in the component
+const navTranslations = {
+  en: {
+    home: "Home",
+    about: "About",
+    services: "Services",
+    treatments: "Treatments",
+    blog: "Blog",
+    contact: "Contact",
+    bookConsultation: "Book Consultation",
+  },
+  ta: {
+    home: "முகப்பு",
+    about: "எங்களை பற்றி",
+    services: "சேவைகள்",
+    treatments: "சிகிச்சைகள்",
+    blog: "வலைப்பதிவு",
+    contact: "தொடர்பு",
+    bookConsultation: "ஆலோசனை பதிவு செய்யுங்கள்",
+  },
+};
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { language, toggleLanguage } = useLanguage();
-  const t = translations[language].nav;
+  const t = navTranslations[language];
 
   const navLinks = [
     { name: t.home, path: "/" },

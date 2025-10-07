@@ -7,8 +7,54 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Mail, Phone, MapPin, Send, Linkedin, Instagram, Facebook } from "lucide-react";
 import { FaTelegram, FaPinterest, FaWhatsapp } from "react-icons/fa";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+// Contact page translations
+const contactTranslations = {
+  en: {
+    title: "Contact Us",
+    subtitle: "Reach out to us for your queries",
+    name: "Name",
+    email: "Email",
+    subject: "Subject",
+    message: "Your Message",
+    send: "Send",
+    success: "Your message has been sent successfully!",
+    error: "Failed to send message. Please try again.",
+    infoTitle: "Contact Information",
+    followUs: "Follow Us",
+    consultationHours: "Consultation Hours",
+    weekdays: "Weekdays",
+    weekends: "Weekends",
+    weekdaysTime: "9:00 AM - 7:00 PM",
+    weekendsTime: "10:00 AM - 5:00 PM",
+    emergency: "* Emergency consultations can be arranged. Please contact us.",
+  },
+  ta: {
+    title: "தொடர்பு கொள்ளுங்கள்",
+    subtitle: "உங்கள் கேள்விகளுக்கு எங்களை அணுகுங்கள்",
+    name: "பெயர்",
+    email: "மின்னஞ்சல்",
+    subject: "தலைப்பு",
+    message: "உங்கள் செய்தி",
+    send: "அனுப்பு",
+    success: "உங்கள் செய்தி வெற்றிகரமாக அனுப்பப்பட்டது!",
+    error: "செய்தியை அனுப்ப முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    infoTitle: "தொடர்பு தகவல்",
+    followUs: "எங்களை பின்தொடருங்கள்",
+    consultationHours: "ஆலோசனை நேரம்",
+    weekdays: "வார நாட்கள்",
+    weekends: "வார இறுதிகள்",
+    weekdaysTime: "காலை 9:00 - மாலை 7:00",
+    weekendsTime: "காலை 10:00 - மாலை 5:00",
+    emergency: "* அவசர ஆலோசனைகள் ஏற்பாடு செய்யப்படும். தயவுசெய்து எங்களை தொடர்பு கொள்ளவும்.",
+  },
+};
 
 const Contact = () => {
+  const { language } = useLanguage();
+  const t = contactTranslations[language];
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,7 +64,7 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent successfully! We'll get back to you soon.");
+    toast.success(t.success);
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
 
@@ -64,9 +110,9 @@ const Contact = () => {
         {/* Hero */}
         <section className="py-20 bg-gradient-to-br from-muted/50 to-background">
           <div className="container mx-auto px-4 text-center space-y-6 animate-fade-in">
-            <h1 className="text-5xl font-bold text-foreground">Get in Touch</h1>
+            <h1 className="text-5xl font-bold text-foreground">{t.title}</h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Have a question or want to schedule your consultation? We'd love to hear from you.
+              {t.subtitle}
             </p>
           </div>
         </section>
@@ -77,7 +123,7 @@ const Contact = () => {
             <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {/* Contact Info */}
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-foreground mb-6">Contact Information</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-6">{t.infoTitle}</h2>
                 
                 {contactInfo.map((info, index) => (
                   <Card key={index} className="border-2 hover:border-primary transition-all">
@@ -107,7 +153,7 @@ const Contact = () => {
                 {/* Social Links */}
                 <Card className="border-2">
                   <CardContent className="p-6">
-                    <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
+                    <h3 className="font-semibold text-foreground mb-4">{t.followUs}</h3>
                     <div className="flex flex-wrap gap-3">
                       {socialLinks.map(({ Icon, href, label, color }) => (
                         <a
@@ -130,12 +176,12 @@ const Contact = () => {
               <div className="lg:col-span-2">
                 <Card className="border-2">
                   <CardContent className="p-8">
-                    <h2 className="text-2xl font-bold text-foreground mb-6">Send us a Message</h2>
+                    <h2 className="text-2xl font-bold text-foreground mb-6">{t.send || "Send us a Message"}</h2>
                     
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Your Name *</Label>
+                          <Label htmlFor="name">{t.name} *</Label>
                           <Input
                             id="name"
                             name="name"
@@ -147,7 +193,7 @@ const Contact = () => {
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="email">Your Email *</Label>
+                          <Label htmlFor="email">{t.email} *</Label>
                           <Input
                             id="email"
                             name="email"
@@ -161,7 +207,7 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="subject">Subject *</Label>
+                        <Label htmlFor="subject">{t.subject} *</Label>
                         <Input
                           id="subject"
                           name="subject"
@@ -173,7 +219,7 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="message">Message *</Label>
+                        <Label htmlFor="message">{t.message} *</Label>
                         <Textarea
                           id="message"
                           name="message"
@@ -187,7 +233,7 @@ const Contact = () => {
 
                       <Button type="submit" size="lg" className="w-full">
                         <Send className="mr-2 w-5 h-5" />
-                        Send Message
+                        {t.send}
                       </Button>
                     </form>
                   </CardContent>
@@ -202,22 +248,22 @@ const Contact = () => {
           <div className="container mx-auto px-4">
             <Card className="max-w-4xl mx-auto border-2">
               <CardContent className="p-8 text-center space-y-4">
-                <h3 className="text-2xl font-bold text-foreground">Consultation Hours</h3>
+                <h3 className="text-2xl font-bold text-foreground">{t.consultationHours}</h3>
                 <p className="text-muted-foreground">
-                  We offer flexible online consultation hours to accommodate your schedule.
+                  {t.subtitle}
                 </p>
                 <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-6">
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-foreground">Weekdays</h4>
-                    <p className="text-muted-foreground">9:00 AM - 7:00 PM</p>
+                    <h4 className="font-semibold text-foreground">{t.weekdays}</h4>
+                    <p className="text-muted-foreground">{t.weekdaysTime}</p>
                   </div>
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-foreground">Weekends</h4>
-                    <p className="text-muted-foreground">10:00 AM - 5:00 PM</p>
+                    <h4 className="font-semibold text-foreground">{t.weekends}</h4>
+                    <p className="text-muted-foreground">{t.weekendsTime}</p>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground italic pt-4">
-                  * Emergency consultations may be arranged. Please contact us for urgent matters.
+                  {t.emergency}
                 </p>
               </CardContent>
             </Card>
