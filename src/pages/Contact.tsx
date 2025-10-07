@@ -1,0 +1,238 @@
+import { useState } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { Mail, Phone, MapPin, Send, Linkedin, Instagram, Facebook } from "lucide-react";
+import { FaTelegram, FaPinterest, FaWhatsapp } from "react-icons/fa";
+
+const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success("Message sent successfully! We'll get back to you soon.");
+    setFormData({ name: "", email: "", subject: "", message: "" });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      title: "Email",
+      value: "contact@puthuyir.com",
+      href: "mailto:contact@puthuyir.com"
+    },
+    {
+      icon: Phone,
+      title: "Phone / WhatsApp",
+      value: "+91 98765 43210",
+      href: "tel:+919876543210"
+    },
+    {
+      icon: MapPin,
+      title: "Location",
+      value: "Online Consultations Available",
+      href: null
+    }
+  ];
+
+  const socialLinks = [
+    { Icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:text-blue-600" },
+    { Icon: Instagram, href: "#", label: "Instagram", color: "hover:text-pink-600" },
+    { Icon: FaTelegram, href: "#", label: "Telegram", color: "hover:text-blue-500" },
+    { Icon: FaWhatsapp, href: "#", label: "WhatsApp", color: "hover:text-green-500" },
+    { Icon: Facebook, href: "#", label: "Facebook", color: "hover:text-blue-700" },
+    { Icon: FaPinterest, href: "#", label: "Pinterest", color: "hover:text-red-600" }
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="py-20 bg-gradient-to-br from-muted/50 to-background">
+          <div className="container mx-auto px-4 text-center space-y-6 animate-fade-in">
+            <h1 className="text-5xl font-bold text-foreground">Get in Touch</h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Have a question or want to schedule your consultation? We'd love to hear from you.
+            </p>
+          </div>
+        </section>
+
+        {/* Contact Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Contact Info */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-foreground mb-6">Contact Information</h2>
+                
+                {contactInfo.map((info, index) => (
+                  <Card key={index} className="border-2 hover:border-primary transition-all">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center flex-shrink-0">
+                          <info.icon className="w-6 h-6 text-primary-foreground" />
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="font-semibold text-foreground">{info.title}</h3>
+                          {info.href ? (
+                            <a 
+                              href={info.href}
+                              className="text-muted-foreground hover:text-primary transition-colors"
+                            >
+                              {info.value}
+                            </a>
+                          ) : (
+                            <p className="text-muted-foreground">{info.value}</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Social Links */}
+                <Card className="border-2">
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {socialLinks.map(({ Icon, href, label, color }) => (
+                        <a
+                          key={label}
+                          href={href}
+                          aria-label={label}
+                          className={`w-12 h-12 rounded-full bg-muted flex items-center justify-center transition-all ${color} hover:scale-110`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Icon className="w-6 h-6" />
+                        </a>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Contact Form */}
+              <div className="lg:col-span-2">
+                <Card className="border-2">
+                  <CardContent className="p-8">
+                    <h2 className="text-2xl font-bold text-foreground mb-6">Send us a Message</h2>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Your Name *</Label>
+                          <Input
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="John Doe"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Your Email *</Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="john@example.com"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="subject">Subject *</Label>
+                        <Input
+                          id="subject"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleChange}
+                          placeholder="What is this regarding?"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="message">Message *</Label>
+                        <Textarea
+                          id="message"
+                          name="message"
+                          value={formData.message}
+                          onChange={handleChange}
+                          placeholder="Tell us more about your inquiry..."
+                          className="min-h-32"
+                          required
+                        />
+                      </div>
+
+                      <Button type="submit" size="lg" className="w-full">
+                        <Send className="mr-2 w-5 h-5" />
+                        Send Message
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Map or Additional Info */}
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <Card className="max-w-4xl mx-auto border-2">
+              <CardContent className="p-8 text-center space-y-4">
+                <h3 className="text-2xl font-bold text-foreground">Consultation Hours</h3>
+                <p className="text-muted-foreground">
+                  We offer flexible online consultation hours to accommodate your schedule.
+                </p>
+                <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-6">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-foreground">Weekdays</h4>
+                    <p className="text-muted-foreground">9:00 AM - 7:00 PM</p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-foreground">Weekends</h4>
+                    <p className="text-muted-foreground">10:00 AM - 5:00 PM</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground italic pt-4">
+                  * Emergency consultations may be arranged. Please contact us for urgent matters.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Contact;
