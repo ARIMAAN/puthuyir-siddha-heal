@@ -44,9 +44,11 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-                <Leaf className="w-6 h-6 text-primary-foreground" />
-              </div>
+              <img
+                src="/logo-modified.svg"
+                alt="Puthuyir Logo"
+                className="w-14 h-14 rounded-full"
+              />
               <span className="text-xl font-bold text-foreground">Puthuyir</span>
             </div>
             <p className="text-sm text-muted-foreground">

@@ -49,9 +49,11 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
-              <Leaf className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <img
+              src="/logo-modified.svg"
+              alt="Puthuyir Logo"
+              className="w-14 h-14 rounded-full transition-transform group-hover:scale-110"
+            />
             <span className="text-xl font-bold text-foreground">Puthuyir</span>
           </Link>
 
