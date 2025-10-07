@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Leaf } from "lucide-react";
+import { Menu, X, Leaf, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/data/translations";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { language, toggleLanguage } = useLanguage();
+  const t = translations[language].nav;
 
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "About", path: "/about" },
-    { name: "Services", path: "/services" },
-    { name: "Treatments", path: "/treatments" },
-    { name: "Blog", path: "/blog" },
-    { name: "Contact", path: "/contact" },
+    { name: t.home, path: "/" },
+    { name: t.about, path: "/about" },
+    { name: t.services, path: "/services" },
+    { name: t.treatments, path: "/treatments" },
+    { name: t.blog, path: "/blog" },
+    { name: t.contact, path: "/contact" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -45,8 +49,17 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleLanguage}
+              className="gap-2"
+            >
+              <Languages className="w-4 h-4" />
+              {language === "en" ? "தமிழ்" : "EN"}
+            </Button>
             <Button asChild variant="default">
-              <Link to="/book-appointment">Book Consultation</Link>
+              <Link to="/book-appointment">{t.bookConsultation}</Link>
             </Button>
           </div>
 
@@ -78,9 +91,18 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleLanguage}
+                className="mx-4 gap-2"
+              >
+                <Languages className="w-4 h-4" />
+                {language === "en" ? "தமிழ்" : "EN"}
+              </Button>
               <Button asChild className="mx-4">
                 <Link to="/book-appointment" onClick={() => setIsOpen(false)}>
-                  Book Consultation
+                  {t.bookConsultation}
                 </Link>
               </Button>
             </div>
