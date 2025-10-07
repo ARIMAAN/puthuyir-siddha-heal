@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import heroImage from "@/assets/hero-siddha.jpg";
 import { 
   Leaf, 
@@ -65,9 +63,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
+    <>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20"></div>
@@ -174,9 +170,7 @@ const Index = () => {
           </Button>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 
