@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { MessageSquare, Phone, Video, Calendar, Clock, User, Mail, FileText } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 
 // BookAppointment page translations
 const consultationTranslations = {
@@ -49,6 +50,35 @@ const consultationTranslations = {
   },
 };
 
+// Dummy function to get user info from token/localStorage
+function getUser() {
+  const token = localStorage.getItem("token");
+  // Replace this with real user fetching logic (e.g., decode JWT or fetch from backend)
+  if (!token) return null;
+  // Example: decode token or fetch user profile
+  // For now, just return a dummy user
+  return { name: localStorage.getItem("userName") || "Client" };
+}
+
+const steps = [
+  {
+    title: "Step 1: Sign In",
+    desc: "Sign in with your Google account to access booking and your medical dashboard.",
+  },
+  {
+    title: "Step 2: Complete Profile",
+    desc: "Fill in your personal and health details to help us serve you better.",
+  },
+  {
+    title: "Step 3: Book Consultant",
+    desc: "Choose your consultant, select a slot, and confirm your appointment.",
+  },
+  {
+    title: "Step 4: View Dashboard",
+    desc: "See your appointment history, prescriptions, and manage your profile.",
+  },
+];
+
 const BookAppointment = () => {
   const { language } = useLanguage();
   const t = consultationTranslations[language];
@@ -65,34 +95,52 @@ const BookAppointment = () => {
 
   const consultationOptions = [
     { value: "chat", label: "Chat Consultation", icon: MessageSquare },
-    { value: "audio", label: "Audio Call", icon: Phone },
-    { value: "video", label: "Video Call", icon: Video }
+    { value: "audio", label: "Audio Call", icon: Phone }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success(t.success);
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      preferredDate: "",
-      preferredTime: "",
-      symptoms: ""
-    });
-  };
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const user = getUser();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
+  if (!token) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
+          <h2 className="text-2xl font-bold mb-6 text-center text-green-700">How to Book a Consultant</h2>
+          <div className="space-y-4 mb-8">
+            {steps.map((step, idx) => (
+              <div key={idx} className="border-l-4 border-green-500 bg-green-50 p-4 rounded shadow-sm">
+                <div className="font-semibold text-green-800">{step.title}</div>
+                <div className="text-gray-700">{step.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="bg-gray-100 rounded-lg p-6 w-full max-w-xs shadow-inner mb-4">
+              <div className="text-center text-gray-800 mb-2">
+                <span className="text-lg font-semibold">🔒 Please sign in to continue</span>
+              </div>
+              <button
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition"
+                onClick={() => navigate("/signin")}
+              >
+                Sign In with Google
+              </button>
+            </div>
+            <button
+              className="text-gray-500 underline mt-2"
+              onClick={() => navigate("/")}
+            >
+              ← Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="flex-1">
-        {/* Hero */}
         <section className="py-20 bg-gradient-to-br from-muted/50 to-background">
           <div className="container mx-auto px-4 text-center space-y-6 animate-fade-in">
             <h1 className="text-5xl font-bold text-foreground">{t.title}</h1>
@@ -102,14 +150,12 @@ const BookAppointment = () => {
           </div>
         </section>
 
-        {/* Booking Form */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
               <Card className="border-2">
                 <CardContent className="p-8">
                   <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Consultation Type */}
                     <div className="space-y-4">
                       <Label className="text-lg font-semibold">Choose Consultation Mode</Label>
                       <RadioGroup value={consultationType} onValueChange={setConsultationType}>
@@ -190,7 +236,6 @@ const BookAppointment = () => {
                       </div>
                     </div>
 
-                    {/* Preferred Schedule */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-primary" />
@@ -229,7 +274,6 @@ const BookAppointment = () => {
                       </div>
                     </div>
 
-                    {/* Health Details */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <FileText className="w-5 h-5 text-primary" />
@@ -248,18 +292,15 @@ const BookAppointment = () => {
                           required
                         />
                         <p className="text-sm text-muted-foreground">
-                          {/* You can also upload reports during the consultation */}
                         </p>
                       </div>
                     </div>
 
-                    {/* Submit */}
                     <Button type="submit" size="lg" className="w-full">
                       {t.submit}
                     </Button>
 
                     <p className="text-sm text-center text-muted-foreground">
-                      {/* By booking, you agree to receive communication regarding your consultation */}
                     </p>
                   </form>
                 </CardContent>

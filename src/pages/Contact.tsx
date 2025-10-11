@@ -61,11 +61,40 @@ const Contact = () => {
     subject: "",
     message: ""
   });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success(t.success);
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setSending(true);
+    setError(null);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          name: formData.get("name"), 
+          email: formData.get("email"), 
+          message: formData.get("message") 
+        }),
+      });
+
+      if (response.ok) {
+        setSent(true);
+        form.reset();
+      } else {
+        setError("Failed to send message. Please try again.");
+      }
+    } catch (err) {
+      setError("Failed to send message. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -97,12 +126,8 @@ const Contact = () => {
   ];
 
   const socialLinks = [
-    { Icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:text-blue-600" },
     { Icon: Instagram, href: "#", label: "Instagram", color: "hover:text-pink-600" },
-    { Icon: FaTelegram, href: "#", label: "Telegram", color: "hover:text-blue-500" },
-    { Icon: FaWhatsapp, href: "#", label: "WhatsApp", color: "hover:text-green-500" },
-    { Icon: Facebook, href: "#", label: "Facebook", color: "hover:text-blue-700" },
-    { Icon: FaPinterest, href: "#", label: "Pinterest", color: "hover:text-red-600" }
+    { Icon: FaWhatsapp, href: "#", label: "WhatsApp", color: "hover:text-green-500" }
   ];
 
   return (
@@ -231,11 +256,13 @@ const Contact = () => {
                         />
                       </div>
 
-                      <Button type="submit" size="lg" className="w-full">
+                      <Button type="submit" size="lg" className="w-full" disabled={sending}>
                         <Send className="mr-2 w-5 h-5" />
-                        {t.send}
+                        {sending ? "Sending..." : t.send}
                       </Button>
                     </form>
+                    {sent && <div className="mt-4 text-green-500">{t.success}</div>}
+                    {error && <div className="mt-4 text-red-500">{error}</div>}
                   </CardContent>
                 </Card>
               </div>

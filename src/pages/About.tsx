@@ -5,11 +5,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // About page translations
 const aboutTranslations = {
   en: {
-    drTitle: "Dr. Dhivyadhashini, BSMS",
+    drTitle: "Dr. Dhivyadhashini T, BSMS",
     drDesc:
       "Siddha Physician & Founder, Puthuyir. Experienced doctor providing personalized care and attention.",
     description:
-      "Puthuyir is a leading provider of natural Siddha consultations and rejuvenation therapies led by Dr. Dhivyadhashini, BSMS. We offer a holistic approach to your health and wellbeing.",
+      "Puthuyir is a leading provider of natural Siddha consultations and rejuvenation therapies led by Dr. Dhivyadhashini T, BSMS. We offer a holistic approach to your health and wellbeing.",
     introDesc:
       "A pioneer in delivering natural health through Siddha medicine and rejuvenation therapy.",
   },
