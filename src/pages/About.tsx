@@ -5,11 +5,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // About page translations
 const aboutTranslations = {
   en: {
-    drTitle: "Dr. Dhivyadhashini T, BSMS",
+    drTitle: "Dr. Dhivyadharshini T, BSMS",
     drDesc:
       "Siddha Physician & Founder, Puthuyir. Experienced doctor providing personalized care and attention.",
     description:
-      "Puthuyir is a leading provider of natural Siddha consultations and rejuvenation therapies led by Dr. Dhivyadhashini T, BSMS. We offer a holistic approach to your health and wellbeing.",
+      "Puthuyir is a leading provider of natural Siddha consultations and rejuvenation therapies led by Dr. Dhivyadharshini T, BSMS. We offer a holistic approach to your health and wellbeing.",
     introDesc:
       "A pioneer in delivering natural health through Siddha medicine and rejuvenation therapy.",
   },
@@ -182,12 +182,12 @@ const About = () => {
                 <h3 className="text-3xl font-bold">
                   {language === "ta"
                     ? "எங்கள் நோயாளிகளுக்கான செய்தி"
-                    : "A Message to My Patients"}
+                    : "A Message to My Medical Beneficiaries"}
                 </h3>
                 <p className="text-lg leading-relaxed opacity-90">
                   {language === "ta"
                     ? "நோய்களுக்கு சிகிச்சை பெறுவதற்காக மட்டுமல்லாமல், புத்துயிர் சித்த நடைமுறைகளை உங்கள் நலனையும் நோய் தடுப்பையும் மேம்படுத்தும் வழியாகவும் ஏற்குமாறு நான் என் நோயாளிகளை ஊக்குவிக்கிறேன். உண்மையான ஆரோக்கியம் என்பது நோய் இல்லாத நிலை மட்டுமல்ல — அது முழுமையான உடல், மனம் மற்றும் ஆன்ம நலனாகும்."
-                    : "I encourage my patients not only to seek treatment for illness but also to embrace Siddha practices as a way to maintain wellness and prevent disease. True health is not merely the absence of illness — it is a state of complete physical, mental, and spiritual wellbeing."}
+                    : "I encourage my medical beneficiaries not only to seek treatment for illness but also to embrace Siddha practices as a way to maintain wellness and prevent disease. True health is not merely the absence of illness — it is a state of complete physical, mental, and spiritual wellbeing."}
                 </p>
                 <p className="font-medium text-xl">
                   {language === "ta"

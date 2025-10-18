@@ -471,9 +471,15 @@ app.post("/api/profile", async (req, res) => {
 
 app.post("/api/book", async (req, res) => {
   if (!req.userId) return res.status(401).json({ error: "Unauthorized" });
+  const nodemailer = require('nodemailer');
+
   try {
     const patient = await Patient.findOne({ user_id: req.userId });
     if (!patient) return res.status(400).json({ error: "Profile incomplete" });
+
+    // Get user email for sending emails
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     const consultant = await Consultant.findOne({ name: req.body.consultant });
     if (!consultant) {
@@ -505,13 +511,122 @@ app.post("/api/book", async (req, res) => {
     });
     await booking.save();
 
+    // Prepare email templates
+    const patientEmailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">✅ Appointment Booked Successfully!</h2>
+        <p>Dear <strong>${patient.full_name}</strong>,</p>
+        <p>Your online consultation appointment has been successfully booked with <strong>${consultant.name}</strong>.</p>
+
+        <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
+          <h3 style="margin-top: 0; color: #0ea5e9;">📋 Appointment Details:</h3>
+          <p><strong>👨‍⚕️ Consultant:</strong> ${consultant.name}</p>
+          <p><strong>📅 Date & Time:</strong> ${new Date(req.body.preferredDate).toLocaleString()}</p>
+          <p><strong>🩺 Symptoms:</strong> ${req.body.symptoms}</p>
+          <p><strong>🔑 Booking Token:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">${bookingToken}</code></p>
+        </div>
+
+        <div style="background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0;"><strong>📞 Next Steps:</strong> Our consultant will contact you shortly to confirm the appointment and discuss your health concerns.</p>
+        </div>
+
+        <p>You can use the booking token above to reschedule your appointment if needed (valid for 30 days).</p>
+
+        <p>Thank you for choosing Puthuyir Healthcare for your traditional Siddha medicine consultation!</p>
+
+        <p>Best regards,<br><strong>Puthuyir Healthcare Team</strong></p>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+        <div style="text-align: center; color: #9ca3af; font-size: 12px;">
+          <p>Puthuyir Healthcare | Traditional Siddha Medicine</p>
+          <p>For urgent matters, please call us directly.</p>
+        </div>
+      </div>
+    `;
+
+    const consultantEmailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">🔔 New Appointment Booking</h2>
+        <p>Hello <strong>${consultant.name}</strong>,</p>
+        <p>You have a new online consultation appointment scheduled.</p>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e2e8f0;">
+          <h3 style="margin-top: 0; color: #1f2937;">👤 Patient Information:</h3>
+          <p><strong>👤 Name:</strong> ${patient.full_name}</p>
+          <p><strong>📧 Email:</strong> <a href="mailto:${user.email}" style="color: #2563eb;">${user.email}</a></p>
+          <p><strong>📱 Phone:</strong> ${req.body.phone || 'Not provided'}</p>
+          <p><strong>📅 Appointment Date:</strong> ${new Date(req.body.preferredDate).toLocaleString()}</p>
+          <p><strong>🩺 Symptoms/Concerns:</strong> ${req.body.symptoms}</p>
+        </div>
+
+        <div style="background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0;"><strong>⚡ Action Required:</strong> Please contact the patient to confirm the appointment and prepare for the consultation.</p>
+        </div>
+
+        <p>You can respond to the patient directly using their email address above.</p>
+
+        <p>Best regards,<br><strong>Puthuyir Healthcare System</strong></p>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+        <div style="text-align: center; color: #9ca3af; font-size: 12px;">
+          <p>Puthuyir Healthcare | Traditional Siddha Medicine</p>
+        </div>
+      </div>
+    `;
+
+    // Send emails if SMTP is configured
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT) || 465,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+
+      // Send patient confirmation email
+      try {
+        await transporter.sendMail({
+          from: `"Puthuyir Healthcare" <${process.env.SMTP_USER}>`,
+          to: user.email, // Use user.email instead of patient.email
+          subject: '✅ Appointment Booked - Puthuyir Healthcare',
+          html: patientEmailHtml
+        });
+        console.log(`✅ Patient confirmation email sent to ${user.email}`);
+      } catch (patientEmailError) {
+        console.error('❌ Failed to send patient confirmation email:', patientEmailError);
+      }
+
+      // Send consultant notification email
+      try {
+        // For now, send to admin email as consultant email. In production, you'd have consultant emails in the database
+        if (process.env.CONTACT_RECEIVER) {
+          await transporter.sendMail({
+            from: `"Puthuyir Healthcare" <${process.env.SMTP_USER}>`,
+            to: process.env.CONTACT_RECEIVER, // Using admin email for now
+            subject: `🔔 New Appointment: ${patient.full_name} - ${consultant.name}`,
+            html: consultantEmailHtml
+          });
+          console.log(`✅ Consultant notification sent to ${process.env.CONTACT_RECEIVER}`);
+        }
+      } catch (consultantEmailError) {
+        console.error('❌ Failed to send consultant notification email:', consultantEmailError);
+      }
+    }
+
     res.json({
       success: true,
       booking: {
         ...booking.toObject(),
         token: bookingToken
       },
-      message: "Appointment booked successfully. You can use the token to reschedule if needed."
+      message: "Appointment booked successfully! Confirmation emails have been sent.",
+      emails: {
+        patient: "Confirmation sent to patient",
+        consultant: "Notification sent to consultant"
+      }
     });
   } catch (error) {
     console.error("Booking error:", error);

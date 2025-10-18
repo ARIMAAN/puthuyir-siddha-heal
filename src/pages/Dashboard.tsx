@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Calendar, Clock, User, Phone, Mail, MapPin, Video, MessageSquare, Shield } from "lucide-react";
 import apiClient from "@/utils/apiClient";
 
@@ -120,7 +121,16 @@ const Dashboard = () => {
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">{userData.email}</span>
                   {userData.is_verified && (
-                    <Shield className="h-4 w-4 text-green-500" title="Verified" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Shield className="h-4 w-4 text-green-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Verified</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
                 {userData.oauth_provider && (
@@ -165,7 +175,7 @@ const Dashboard = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">
-                        {booking.consultant_id?.name || "Dr. Dhivyadhashini"}
+                        {booking.consultant_id?.name || "Dr. Dhivyadharshini"}
                       </CardTitle>
                       <Badge className={getStatusColor(booking.status)}>
                         {booking.status}
@@ -201,7 +211,7 @@ const Dashboard = () => {
                       </div>
                       <div className="space-y-2">
                         <div className="text-sm">
-                          <span className="font-medium">Patient:</span> {booking.patient_name}
+                          <span className="font-medium">Medical Beneficiary:</span> {booking.patient_name}
                         </div>
                         <div className="text-sm">
                           <span className="font-medium">Contact:</span> {booking.patient_phone}

@@ -30,7 +30,7 @@ const homeTranslations = {
       natural: "100% Siddha-based Natural Treatments",
       naturalDesc: "Ancient wisdom for modern wellness",
       consultation: "Online Consultation via Chat, Audio, or Video",
-      consultationDesc: "Connect with Dr. Dhivyadhashini anytime",
+      consultationDesc: "Connect with Dr. Dhivyadharshini anytime",
       prescription: "Personalized E-Prescription & Home Delivery",
       prescriptionDesc: "Care delivered to your doorstep",
       followup: "Continuous Follow-up & Lifestyle Guidance",

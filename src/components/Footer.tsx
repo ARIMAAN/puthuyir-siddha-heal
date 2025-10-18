@@ -142,7 +142,7 @@ const Footer = () => {
 
         <div className="mt-8 pt-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            {t.rights} | Dr. Dhivyadhashini, BSMS
+            {t.rights} | Dr. Dhivyadharshini, BSMS
           </p>
         </div>
       </div>

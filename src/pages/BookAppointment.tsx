@@ -22,6 +22,7 @@ const consultationTranslations = {
     preferredDate: "Preferred Date",
     preferredTime: "Preferred Time",
     submit: "Submit",
+    booking: "Booking...",
     success: "Your appointment has been booked successfully!",
     error: "Failed to book appointment. Please try again.",
     chat: "Chat Consultation",
@@ -43,6 +44,7 @@ const consultationTranslations = {
     preferredDate: "விருப்பமான தேதி",
     preferredTime: "விருப்பமான நேரம்",
     submit: "பதிவுசெய்யவும்",
+    booking: "பதிவு செய்கிறது...",
     success: "உங்கள் ஆலோசனை பதிவு வெற்றிகரமாக செய்யப்பட்டது!",
     error: "பதிவைச் செய்ய முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
     chat: "அரட்டை ஆலோசனை",
@@ -95,6 +97,7 @@ const BookAppointment = () => {
     preferredDate: ""
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -139,6 +142,8 @@ const BookAppointment = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:5000/api/book", {
@@ -148,7 +153,7 @@ const BookAppointment = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          consultant: "Dr. Dhivyadhashini",
+          consultant: "Dr. Dhivyadharshini",
           preferredDate: formData.preferredDate,
           symptoms: formData.symptoms,
           name: formData.name,
@@ -166,6 +171,8 @@ const BookAppointment = () => {
     } catch (err) {
       console.error("Booking submission error:", err);
       toast.error(t.error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -329,8 +336,15 @@ const BookAppointment = () => {
                       </div>
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full">
-                      {t.submit}
+                    <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          {t.booking}
+                        </>
+                      ) : (
+                        t.submit
+                      )}
                     </Button>
 
                     <p className="text-sm text-center text-muted-foreground">

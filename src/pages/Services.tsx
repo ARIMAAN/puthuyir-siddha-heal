@@ -21,7 +21,7 @@ const servicesTranslations = {
     title: "Services",
     subtitle: "Comprehensive Siddha therapies for your needs",
     consultationModesTitle: "Choose Your Consultation Mode",
-    consultationModesDesc: "Connect with Dr. Dhivyadhashini in your preferred way",
+    consultationModesDesc: "Connect with Dr. Dhivyadharshini in your preferred way",
     chat: "Chat Consultation",
     chatDesc: "Text-based consultation for detailed discussions at your convenience",
     audio: "Audio Call Consultation",

@@ -91,7 +91,7 @@ const BlogPost = () => {
                 </h3>
                 <p className="text-lg opacity-90">
                   {language === "en"
-                    ? "Book a consultation with Dr. Dhivyadhashini for personalized Siddha treatment."
+                    ? "Book a consultation with Dr. Dhivyadharshini for personalized Siddha treatment."
                     : "தனிப்பயனாக்கப்பட்ட சித்த சிகிச்சைக்காக டாக்டர் திவ்யதர்சினியுடன் ஆலோசனை பதிவு செய்யுங்கள்."}
                 </p>
                 <Button asChild size="lg" variant="secondary" className="shadow-lg">

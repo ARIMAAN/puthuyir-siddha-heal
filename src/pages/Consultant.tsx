@@ -12,7 +12,7 @@ const Consultant = () => {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
   const consultant = {
-    name: "Dr. Dhivyadhashini",
+    name: "Dr. Dhivyadharshini",
     specialty: "Siddha Medicine",
     profile: "Experienced Siddha consultant specializing in holistic health and rejuvenation therapies.",
   };

@@ -63,7 +63,7 @@ export const blogPosts: BlogPost[] = [
 <li>Delayed signs of aging</li>
 </ul>
 
-<p><em>Interested in starting your Kaya Kalpa journey? Book a consultation with Dr. Dhivyadhashini to learn more about personalized rejuvenation therapy.</em></p>`,
+<p><em>Interested in starting your Kaya Kalpa journey? Book a consultation with Dr. Dhivyadharshini to learn more about personalized rejuvenation therapy.</em></p>`,
     contentTa: `<h2>காயகல்பத்தைப் புரிந்துகொள்ளுதல்</h2>
 <p>காயகல்பம் என்பது இளமை, உயிர்ச்சக்தி மற்றும் நீண்ட ஆயுளை மீட்டெடுப்பதை நோக்கமாகக் கொண்ட ஒரு பழமையான சித்த புத்துயிர் சிகிச்சை ஆகும். "காயா" என்றால் உடல், "கல்பம்" என்றால் மாற்றம் அல்லது புதுப்பித்தல். இந்த சக்திவாய்ந்த நடைமுறை சித்த மாஸ்டர்களால் பல நூற்றாண்டுகளாக உகந்த ஆரோக்கியத்தை அடையவும் ஆயுளை நீட்டிக்கவும் பயன்படுத்தப்படுகிறது.</p>
 
@@ -164,7 +164,7 @@ export const blogPosts: BlogPost[] = [
 <li><strong>Use Digestive Spices:</strong> Incorporate turmeric, cumin, and coriander</li>
 </ol>
 
-<p><em>For personalized dietary guidance based on your unique constitution, book a consultation with Dr. Dhivyadhashini.</em></p>`,
+<p><em>For personalized dietary guidance based on your unique constitution, book a consultation with Dr. Dhivyadharshini.</em></p>`,
     contentTa: `<h2>மூன்று தோஷங்களைப் புரிந்துகொள்ளுதல்</h2>
 <p>சித்த மருத்துவத்தில், மூன்று முக்கிய சக்திகள் அல்லது தோஷங்களின் சமநிலை மூலம் ஆரோக்கியம் பராமரிக்கப்படுகிறது: வாத (காற்று), பித்த (நெருப்பு), மற்றும் கப (நீர்). நீங்கள் உண்ணும் உணவு இந்த தோஷங்களை நேரடியாகப் பாதிக்கிறது மற்றும் அதன் விளைவாக உங்கள் ஒட்டுமொத்த ஆரோக்கியத்தையும் பாதிக்கிறது.</p>
 
@@ -289,7 +289,7 @@ export const blogPosts: BlogPost[] = [
 <h3>When to Seek Help</h3>
 <p>If stress and fatigue persist despite lifestyle changes, consult with a Siddha physician for personalized treatment.</p>
 
-<p><em>Book a consultation with Dr. Dhivyadhashini for a comprehensive stress management plan tailored to your needs.</em></p>`,
+<p><em>Book a consultation with Dr. Dhivyadharshini for a comprehensive stress management plan tailored to your needs.</em></p>`,
     contentTa: `<h2>சித்த மருத்துவத்தில் மன அழுத்தத்தைப் புரிந்துகொள்ளுதல்</h2>
 <p>மன அழுத்தம் மற்றும் சோர்வு உடலின் முக்கிய ஆற்றல்களில் ஏற்படும் சமநிலையின்மையாகக் காணப்படுகின்றன. சித்த மருத்துவம் இந்த நிலைமைகளின் உடல் மற்றும் மன அம்சங்களைக் கவனிக்கும் முழுமையான தீர்வுகளை வழங்குகிறது.</p>
 
