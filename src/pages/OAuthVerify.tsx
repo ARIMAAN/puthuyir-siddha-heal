@@ -52,7 +52,7 @@ const OAuthVerify = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/verify-oauth", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/verify-oauth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -68,7 +68,7 @@ const OAuthVerify = () => {
         localStorage.setItem("userName", data.name);
         
         // Check if profile is complete
-        const profileResponse = await fetch("http://localhost:5000/api/profile", {
+        const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/profile`, {
           headers: { Authorization: `Bearer ${data.token}` }
         });
         
@@ -101,7 +101,7 @@ const OAuthVerify = () => {
 
   const resendOTP = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/send-otp", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

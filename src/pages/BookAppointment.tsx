@@ -114,7 +114,7 @@ const BookAppointment = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/user", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -146,7 +146,7 @@ const BookAppointment = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/book", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

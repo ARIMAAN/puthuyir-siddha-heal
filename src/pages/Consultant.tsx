@@ -43,7 +43,7 @@ const Consultant = () => {
     if (!isProfileComplete()) { alert("Complete your profile first."); navigate("/profile"); return; }
 
     const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:5000/api/book", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/book`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ consultant: consultant.name, slot: "10:00 AM", date: new Date().toISOString().slice(0, 10) }),

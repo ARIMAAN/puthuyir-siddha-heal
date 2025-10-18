@@ -115,7 +115,7 @@ app.get("/auth/google/callback",
           { expiresIn: "10m" }
         );
         
-        res.redirect(`http://localhost:5173/auth/verify-oauth?temp_token=${tempToken}&email=${encodeURIComponent(user.email)}&new_user=${!user.account_verified}`);
+        res.redirect(`/auth/verify-oauth?temp_token=${tempToken}&email=${encodeURIComponent(user.email)}&new_user=${!user.account_verified}`);
       } else {
         // Verified user - direct login
         const token = jwt.sign(
@@ -137,14 +137,14 @@ app.get("/auth/google/callback",
         });
         
         if (profileComplete) {
-          res.redirect(`http://localhost:5173/signin?token=${token}&name=${encodeURIComponent(user.full_name)}`);
+          res.redirect(`/signin?token=${token}&name=${encodeURIComponent(user.full_name)}`);
         } else {
-          res.redirect(`http://localhost:5173/signin?token=${token}&name=${encodeURIComponent(user.full_name)}&redirect=profile`);
+          res.redirect(`/signin?token=${token}&name=${encodeURIComponent(user.full_name)}&redirect=profile`);
         }
       }
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect(`http://localhost:5173/signin?error=oauth_failed`);
+      res.redirect(`/signin?error=oauth_failed`);
     }
   }
 );
@@ -481,7 +481,7 @@ app.post("/api/book", async (req, res) => {
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const consultant = await Consultant.findOne({ name: req.body.consultant });
+    let consultant = await Consultant.findOne({ name: req.body.consultant });
     if (!consultant) {
       // Create the consultant if she doesn't exist
       const newConsultant = new Consultant({
