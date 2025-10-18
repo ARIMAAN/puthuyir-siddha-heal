@@ -9,7 +9,7 @@ const AuthCallback = () => {
     const token = params.get("token");
     if (token) {
       localStorage.setItem("token", token);
-      navigate("/consultant");
+      navigate("/dashboard");
     } else {
       navigate("/signin");
     }

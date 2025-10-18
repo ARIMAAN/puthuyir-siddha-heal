@@ -1,8 +1,17 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Leaf, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Navbar translations directly in the component
 const navTranslations = {
@@ -29,8 +38,33 @@ const navTranslations = {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { language, toggleLanguage } = useLanguage();
   const t = navTranslations[language];
+
+  const [token, setToken] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    const tkn = localStorage.getItem("token");
+    setToken(tkn);
+    setUserName(localStorage.getItem("userName") || "");
+  }, [location.pathname]);
+
+  const initials = userName
+    .split(" ")
+    .filter(Boolean)
+    .map((s) => s[0]?.toUpperCase())
+    .slice(0, 2)
+    .join("") || "U";
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("profileComplete");
+    setToken(null);
+    navigate("/");
+  };
 
   const navLinks = [
     { name: t.home, path: "/" },
@@ -84,6 +118,29 @@ const Navbar = () => {
             <Button asChild variant="default">
               <Link to="/book-appointment">{t.bookConsultation}</Link>
             </Button>
+            {token ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="ml-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring">
+                    <Avatar>
+                      <AvatarFallback>{initials}</AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{userName || "Account"}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild variant="outline">
+                <Link to="/signin">Sign In</Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -128,6 +185,19 @@ const Navbar = () => {
                   {t.bookConsultation}
                 </Link>
               </Button>
+              {token ? (
+                <div className="mx-4 mt-2 grid gap-2">
+                  <Button variant="secondary" onClick={() => { setIsOpen(false); navigate("/dashboard"); }}>Dashboard</Button>
+                  <Button variant="secondary" onClick={() => { setIsOpen(false); navigate("/profile"); }}>Profile</Button>
+                  <Button variant="outline" onClick={() => { setIsOpen(false); handleSignOut(); }}>Sign out</Button>
+                </div>
+              ) : (
+                <div className="mx-4 mt-2">
+                  <Button asChild onClick={() => setIsOpen(false)}>
+                    <Link to="/signin">Sign In</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}

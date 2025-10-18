@@ -10,7 +10,6 @@ import { MessageSquare, Phone, Video, Calendar, Clock, User, Mail, FileText } fr
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
-// BookAppointment page translations
 const consultationTranslations = {
   en: {
     title: "Book Online Consultation",
@@ -50,13 +49,9 @@ const consultationTranslations = {
   },
 };
 
-// Dummy function to get user info from token/localStorage
 function getUser() {
   const token = localStorage.getItem("token");
-  // Replace this with real user fetching logic (e.g., decode JWT or fetch from backend)
   if (!token) return null;
-  // Example: decode token or fetch user profile
-  // For now, just return a dummy user
   return { name: localStorage.getItem("userName") || "Client" };
 }
 
@@ -101,6 +96,46 @@ const BookAppointment = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const user = getUser();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          consultant: "Dr. Dhivyadhashini",
+          preferredDate: formData.preferredDate,
+          preferredTime: formData.preferredTime,
+          consultationType: consultationType,
+          symptoms: formData.symptoms,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(t.success);
+        navigate("/dashboard");
+      } else {
+        toast.error(data.error || t.error);
+      }
+    } catch (err) {
+      console.error("Booking submission error:", err);
+      toast.error(t.error);
+    }
+  };
 
   if (!token) {
     return (
@@ -184,7 +219,6 @@ const BookAppointment = () => {
                       </RadioGroup>
                     </div>
 
-                    {/* Personal Information */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <User className="w-5 h-5 text-primary" />

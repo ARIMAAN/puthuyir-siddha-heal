@@ -21,11 +21,20 @@ const Consultant = () => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
     const name = params.get("name");
+    const redirect = params.get("redirect");
+    
     if (token && name) {
       localStorage.setItem("token", token);
       localStorage.setItem("userName", name);
-      localStorage.setItem("profileComplete", "false");
-      navigate("/consultant", { replace: true });
+      
+      // Set profile completion status based on redirect parameter
+      if (redirect === "profile") {
+        localStorage.setItem("profileComplete", "false");
+        navigate("/profile", { replace: true });
+      } else {
+        localStorage.setItem("profileComplete", "true");
+        navigate("/dashboard", { replace: true });
+      }
     }
   }, [location, navigate]);
 
