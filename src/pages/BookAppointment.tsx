@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { MessageSquare, Phone, Video, Calendar, Clock, User, Mail, FileText } from "lucide-react";
+import { User, Calendar, FileText, Phone, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +27,9 @@ const consultationTranslations = {
     chat: "Chat Consultation",
     audio: "Audio Call",
     video: "Video Call",
+    successTitle: "Thank you for booking!",
+    successMessage: "We got your booking and will reach you back through mail, WhatsApp or phone call.",
+    okButton: "OK"
   },
   ta: {
     title: "ஆன்லைன் ஆலோசனை பதிவு செய்யுங்கள்",
@@ -46,13 +48,20 @@ const consultationTranslations = {
     chat: "அரட்டை ஆலோசனை",
     audio: "ஆடியோ அழைப்பு",
     video: "வீடியோ அழைப்பு",
+    successTitle: "முன்பதிவுக்கு நன்றி!",
+    successMessage: "உங்கள் முன்பதிவைப் பெற்றுள்ளோம். மின்னஞ்சல், WhatsApp அல்லது தொலைபேசி அழைப்பு மூலம் உங்களைத் தொடர்பு கொள்வோம்.",
+    okButton: "சரி"
   },
 };
 
 function getUser() {
   const token = localStorage.getItem("token");
   if (!token) return null;
-  return { name: localStorage.getItem("userName") || "Client" };
+  return { 
+    name: localStorage.getItem("userName") || "Client",
+    email: localStorage.getItem("userEmail") || "",
+    phone: localStorage.getItem("userPhone") || ""
+  };
 }
 
 const steps = [
@@ -78,24 +87,50 @@ const BookAppointment = () => {
   const { language } = useLanguage();
   const t = consultationTranslations[language];
 
-  const [consultationType, setConsultationType] = useState("chat");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    preferredDate: "",
-    preferredTime: "",
-    symptoms: ""
+    symptoms: "",
+    preferredDate: ""
   });
-
-  const consultationOptions = [
-    { value: "chat", label: "Chat Consultation", icon: MessageSquare },
-    { value: "audio", label: "Audio Call", icon: Phone }
-  ];
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const user = getUser();
+
+  // Fetch user data from API if token exists
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    if (token && user) {
+      fetchUserData();
+    }
+  }, [token, user]);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserData(data);
+        // Pre-populate form with user data
+        setFormData(prev => ({
+          ...prev,
+          name: prev.name || data.full_name || "",
+          email: prev.email || data.email || "",
+          phone: prev.phone || data.phone || ""
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -115,8 +150,6 @@ const BookAppointment = () => {
         body: JSON.stringify({
           consultant: "Dr. Dhivyadhashini",
           preferredDate: formData.preferredDate,
-          preferredTime: formData.preferredTime,
-          consultationType: consultationType,
           symptoms: formData.symptoms,
           name: formData.name,
           email: formData.email,
@@ -126,8 +159,7 @@ const BookAppointment = () => {
 
       const data = await response.json();
       if (response.ok) {
-        toast.success(t.success);
-        navigate("/dashboard");
+        setShowSuccessModal(true);
       } else {
         toast.error(data.error || t.error);
       }
@@ -175,7 +207,8 @@ const BookAppointment = () => {
   }
 
   return (
-    <main className="flex-1">
+    <>
+      <main className="flex-1">
         <section className="py-20 bg-gradient-to-br from-muted/50 to-background">
           <div className="container mx-auto px-4 text-center space-y-6 animate-fade-in">
             <h1 className="text-5xl font-bold text-foreground">{t.title}</h1>
@@ -191,115 +224,61 @@ const BookAppointment = () => {
               <Card className="border-2">
                 <CardContent className="p-8">
                   <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="space-y-4">
-                      <Label className="text-lg font-semibold">Choose Consultation Mode</Label>
-                      <RadioGroup value={consultationType} onValueChange={setConsultationType}>
-                        <div className="grid md:grid-cols-3 gap-4">
-                          {consultationOptions.map((option) => (
-                            <label
-                              key={option.value}
-                              className={`relative flex flex-col items-center gap-3 p-6 border-2 rounded-lg cursor-pointer transition-all ${
-                                consultationType === option.value
-                                  ? "border-primary bg-primary/5"
-                                  : "border-border hover:border-primary/50"
-                              }`}
-                            >
-                              <RadioGroupItem value={option.value} className="sr-only" />
-                              <option.icon className={`w-8 h-8 ${
-                                consultationType === option.value ? "text-primary" : "text-muted-foreground"
-                              }`} />
-                              <span className={`text-sm font-medium text-center ${
-                                consultationType === option.value ? "text-primary" : "text-foreground"
-                              }`}>
-                                {option.label}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </RadioGroup>
-                    </div>
 
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <User className="w-5 h-5 text-primary" />
                         {t.name}
                       </h3>
-                      
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">{t.name} *</Label>
-                          <Input
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            placeholder={t.name}
-                            required
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">{t.phone} *</Label>
-                          <Input
-                            id="phone"
-                            name="phone"
-                            type="tel"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            placeholder="+91 98765 43210"
-                            required
-                          />
-                        </div>
-                      </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="email">{t.email} *</Label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="your@email.com"
-                            className="pl-10"
-                            required
-                          />
-                        </div>
+                        <Label htmlFor="name">{t.name} *</Label>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder={t.name}
+                          required
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-primary" />
-                        {t.preferredDate}
+                        <Mail className="w-5 h-5 text-primary" />
+                        Contact Information
                       </h3>
-                      
+
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="preferredDate">{t.preferredDate} *</Label>
-                          <Input
-                            id="preferredDate"
-                            name="preferredDate"
-                            type="date"
-                            value={formData.preferredDate}
-                            onChange={handleChange}
-                            min={new Date().toISOString().split('T')[0]}
-                            required
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="preferredTime">{t.preferredTime} *</Label>
+                          <Label htmlFor="email">{t.email} *</Label>
                           <div className="relative">
-                            <Clock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                            <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
-                              id="preferredTime"
-                              name="preferredTime"
-                              type="time"
-                              value={formData.preferredTime}
+                              id="email"
+                              name="email"
+                              type="email"
+                              value={formData.email}
                               onChange={handleChange}
+                              placeholder="your@email.com"
+                              className="pl-10"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">{t.phone} *</Label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                            <Input
+                              id="phone"
+                              name="phone"
+                              type="tel"
+                              value={formData.phone}
+                              onChange={handleChange}
+                              placeholder="+91 98765 43210"
                               className="pl-10"
                               required
                             />
@@ -310,10 +289,30 @@ const BookAppointment = () => {
 
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-primary" />
+                        {t.preferredDate}
+                      </h3>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="preferredDate">{t.preferredDate} *</Label>
+                        <Input
+                          id="preferredDate"
+                          name="preferredDate"
+                          type="date"
+                          value={formData.preferredDate}
+                          onChange={handleChange}
+                          min={new Date().toISOString().split('T')[0]}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
                         <FileText className="w-5 h-5 text-primary" />
                         {t.symptoms}
                       </h3>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="symptoms">{t.symptoms} *</Label>
                         <Textarea
@@ -376,6 +375,28 @@ const BookAppointment = () => {
           </div>
         </section>
       </main>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4 text-center">{t.successTitle}</h3>
+            <p className="mb-6 text-center leading-relaxed">
+              {t.successMessage}
+            </p>
+            <Button
+              className="w-full"
+              onClick={() => {
+                setShowSuccessModal(false);
+                navigate("/dashboard");
+              }}
+            >
+              {t.okButton}
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

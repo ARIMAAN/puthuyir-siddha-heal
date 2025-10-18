@@ -61,17 +61,27 @@ app.use(passport.session());
 
 require("./utils/passportGoogle")(passport);
 
-// Middleware to check token expiration
+// Utility function to generate booking token
+const generateBookingToken = () => {
+  const timestamp = Date.now().toString();
+  const random = Math.random().toString(36).substring(2, 8);
+  return `BK${timestamp}${random}`.toUpperCase();
+};
+
+// Middleware to check token expiration and validity
 const checkTokenExpiration = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return next();
-  
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId; // Attach userId to request for use in routes
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: "Session expired", expired: true });
+      return res.status(401).json({ error: "Token expired" });
     }
     return res.status(401).json({ error: "Invalid token" });
   }
@@ -81,6 +91,7 @@ const checkTokenExpiration = (req, res, next) => {
 app.use('/api/profile', checkTokenExpiration);
 app.use('/api/book', checkTokenExpiration);
 app.use('/api/bookings', checkTokenExpiration);
+app.use('/api/user', checkTokenExpiration);
 
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
@@ -314,14 +325,12 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 app.get("/api/profile", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+  if (!req.userId) return res.status(401).json({ error: "Unauthorized" });
   try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    const patient = await Patient.findOne({ user_id: userId });
+    const patient = await Patient.findOne({ user_id: req.userId });
     
     console.log("📋 Profile GET request - Patient data:", {
-      userId,
+      userId: req.userId,
       hasPatient: !!patient,
       dateOfBirth: patient?.date_of_birth,
       dateType: typeof patient?.date_of_birth,
@@ -337,11 +346,9 @@ app.get("/api/profile", async (req, res) => {
 
 // Get user data for dashboard
 app.get("/api/user", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+  if (!req.userId) return res.status(401).json({ error: "Unauthorized" });
   try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(userId).select('-password_hash -login_attempts -account_locked_until');
+    const user = await User.findById(req.userId).select('-password_hash -login_attempts -account_locked_until');
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   } catch {
@@ -350,14 +357,11 @@ app.get("/api/user", async (req, res) => {
 });
 
 app.post("/api/profile", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
-  
+  if (!req.userId) return res.status(401).json({ error: "Unauthorized" });
+
   try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    
     // Check if user needs to complete password setup before saving profile
-    const user = await User.findById(userId);
+    const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -466,29 +470,49 @@ app.post("/api/profile", async (req, res) => {
 });
 
 app.post("/api/book", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+  if (!req.userId) return res.status(401).json({ error: "Unauthorized" });
   try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    const patient = await Patient.findOne({ user_id: userId });
+    const patient = await Patient.findOne({ user_id: req.userId });
     if (!patient) return res.status(400).json({ error: "Profile incomplete" });
 
     const consultant = await Consultant.findOne({ name: req.body.consultant });
-    if (!consultant) return res.status(404).json({ error: "Consultant not found" });
+    if (!consultant) {
+      // Create the consultant if she doesn't exist
+      const newConsultant = new Consultant({
+        name: req.body.consultant,
+        specialization: "Siddha Medicine",
+        about: "Experienced Siddha practitioner specializing in traditional healing methods"
+      });
+      await newConsultant.save();
+      consultant = newConsultant;
+    }
+
+    // Generate a booking token for rescheduling purposes
+    const bookingToken = generateBookingToken();
+    const tokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
     const booking = new Booking({
       patient_id: patient._id,
       consultant_id: consultant._id,
       appointment_date: req.body.preferredDate,
-      appointment_time: req.body.preferredTime,
-      consultation_type: req.body.consultationType,
       symptoms: req.body.symptoms,
       patient_name: req.body.name,
       patient_email: req.body.email,
       patient_phone: req.body.phone,
+      token: bookingToken,
+      token_expires_at: tokenExpiresAt,
+      is_token_booking: true
     });
     await booking.save();
-    res.json({ success: true, booking });
+
+    res.json({
+      success: true,
+      booking: {
+        ...booking.toObject(),
+        token: bookingToken
+      },
+      message: "Appointment booked successfully. You can use the token to reschedule if needed."
+    });
   } catch (error) {
     console.error("Booking error:", error);
     res.status(500).json({ error: "Failed to create booking" });
@@ -496,11 +520,9 @@ app.post("/api/book", async (req, res) => {
 });
 
 app.get("/api/bookings", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+  if (!req.userId) return res.status(401).json({ error: "Unauthorized" });
   try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    const patient = await Patient.findOne({ user_id: userId });
+    const patient = await Patient.findOne({ user_id: req.userId });
     if (!patient) return res.status(400).json({ error: "Profile incomplete" });
 
     const bookings = await Booking.find({ patient_id: patient._id })
@@ -509,8 +531,44 @@ app.get("/api/bookings", async (req, res) => {
     
     res.json(bookings);
   } catch (error) {
-    console.error("Fetch bookings error:", error);
+    console.error("Bookings fetch error:", error);
     res.status(500).json({ error: "Failed to fetch bookings" });
+  }
+});
+app.post("/api/booking/reschedule", async (req, res) => {
+  if (!req.userId) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const { bookingToken, newDate } = req.body;
+
+    if (!bookingToken || !newDate) {
+      return res.status(400).json({ error: "Booking token and new date are required" });
+    }
+
+    // Find the booking by token
+    const booking = await Booking.findOne({
+      token: bookingToken,
+      patient_id: await Patient.findOne({ user_id: req.userId }).then(p => p._id),
+      token_expires_at: { $gt: new Date() }
+    });
+
+    if (!booking) {
+      return res.status(404).json({ error: "Invalid or expired booking token" });
+    }
+
+    // Update the appointment date
+    booking.appointment_date = new Date(newDate);
+    booking.status = "booked"; // Reset status if it was changed
+    await booking.save();
+
+    res.json({
+      success: true,
+      booking: booking,
+      message: "Appointment rescheduled successfully"
+    });
+  } catch (error) {
+    console.error("Reschedule booking error:", error);
+    res.status(500).json({ error: "Failed to reschedule booking" });
   }
 });
 
@@ -1068,14 +1126,150 @@ app.post("/api/auth/verify-oauth", async (req, res) => {
   }
 });
 
-// Temporary endpoint for testing - can be removed later
-app.post("/api/auth/cleanup-otps", async (req, res) => {
+// Contact form endpoint - sends emails directly without database storage
+app.post("/api/contact", async (req, res) => {
+  const nodemailer = require('nodemailer');
+
   try {
-    const { email } = req.body;
-    await OTP.deleteMany({ email, purpose: "password_reset" });
-    res.json({ success: true, message: "OTPs cleaned up" });
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "Name, email, and message are required" });
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Please enter a valid email address" });
+    }
+
+    // Check if SMTP configuration exists
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.log('❌ SMTP configuration missing in .env file');
+      return res.status(500).json({ error: "Email service not configured. Please contact support." });
+    }
+
+    // Create transporter using SMTP
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT) || 465,
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      },
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 5000,    // 5 seconds
+      socketTimeout: 10000      // 10 seconds
+    });
+
+    // Prepare email content for admin
+    const adminEmailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">🔔 New Contact Form Submission</h2>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e2e8f0;">
+          <p><strong>👤 Name:</strong> ${name}</p>
+          <p><strong>📧 Email:</strong> <a href="mailto:${email}" style="color: #2563eb;">${email}</a></p>
+          <p><strong>📝 Subject:</strong> ${subject || 'No subject provided'}</p>
+          <p><strong>💬 Message:</strong></p>
+          <div style="background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #2563eb; margin-top: 10px;">
+            ${message.replace(/\n/g, '<br>')}
+          </div>
+          <p><strong>🕒 Submitted:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+        <div style="background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0;"><strong>⚡ Action Required:</strong> Please respond to this inquiry within 24 hours.</p>
+        </div>
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-size: 14px; text-align: center;">Puthuyir Contact Management System</p>
+      </div>
+    `;
+
+    // Prepare confirmation email for user
+    const userEmailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">✅ Thank You for Contacting Puthuyir!</h2>
+        <p>Dear <strong>${name}</strong>,</p>
+        <p>Thank you for reaching out to us! We have received your message and our team will get back to you within <strong>24-48 hours</strong>.</p>
+
+        <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
+          <h3 style="margin-top: 0; color: #0ea5e9;">📋 Your Message Summary:</h3>
+          <p><strong>Subject:</strong> ${subject || 'General Inquiry'}</p>
+          <p><strong>Message Preview:</strong></p>
+          <p style="font-style: italic; color: #374151;">"${message.length > 150 ? message.substring(0, 150) + '...' : message}"</p>
+        </div>
+
+        <p>If you have any <strong>urgent concerns</strong>, please don't hesitate to call us directly at our contact number.</p>
+
+        <div style="background: #f8fafc; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+          <p style="margin: 0; color: #6b7280;">💡 <strong>Quick Tip:</strong> For faster response, include your phone number in future messages.</p>
+        </div>
+
+        <p>Best regards,<br><strong>Puthuyir Healthcare Team</strong></p>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+        <div style="text-align: center; color: #9ca3af; font-size: 12px;">
+          <p>📧 This is an automated response. Please do not reply to this email.</p>
+          <p>Puthuyir Healthcare | Traditional Siddha Medicine</p>
+        </div>
+      </div>
+    `;
+
+    // Send admin notification email
+    try {
+      await transporter.sendMail({
+        from: `"Puthuyir Contact System" <${process.env.SMTP_USER}>`,
+        to: process.env.CONTACT_RECEIVER,
+        subject: `📧 Contact Form: ${subject || 'New Message'} - ${name}`,
+        html: adminEmailHtml,
+        replyTo: email // Allow admin to reply directly to user
+      });
+      console.log(`✅ Admin notification sent to ${process.env.CONTACT_RECEIVER}`);
+    } catch (adminEmailError) {
+      console.error('❌ Failed to send admin notification:', adminEmailError);
+      return res.status(500).json({ error: "Failed to send notification. Please try again or contact support directly." });
+    }
+
+    // Send confirmation email to user
+    try {
+      await transporter.sendMail({
+        from: `"Puthuyir Healthcare" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: '✅ Thank you for contacting Puthuyir - We received your message',
+        html: userEmailHtml
+      });
+      console.log(`✅ Confirmation email sent to ${email}`);
+    } catch (userEmailError) {
+      console.error('❌ Failed to send confirmation email:', userEmailError);
+      // Don't fail the request if confirmation email fails, admin email already sent
+      console.log('⚠️ Admin notified but user confirmation failed - continuing');
+    }
+
+    console.log(`📧 Contact form processed successfully:`, {
+      name,
+      email,
+      subject: subject || 'No subject',
+      messageLength: message.length,
+      adminNotified: true,
+      userNotified: true,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({
+      success: true,
+      message: "Thank you for your message! We have received it and will get back to you within 24-48 hours.",
+      emails: {
+        admin: "Notification sent to support team",
+        confirmation: "Confirmation sent to your email"
+      }
+    });
+
   } catch (error) {
-    res.status(500).json({ error: "Cleanup failed" });
+    console.error("❌ Contact form error:", error);
+    res.status(500).json({
+      error: "Failed to send message. Please try again or contact us directly.",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
