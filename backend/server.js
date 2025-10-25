@@ -48,12 +48,16 @@ const app = express();
 const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const BACKEND_BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
+// Update CORS configuration
 app.use(cors({
   origin: [
-    process.env.FRONTEND_URL || "http://localhost:5173",
-    "http://localhost:5173"
+    process.env.FRONTEND_URL,
+    'https://puthuyir-siddha-medicine.vercel.app',
+    'http://localhost:5173'
   ],
-  credentials: true
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(bodyParser.json());
 app.use(session({ 
@@ -1376,30 +1380,6 @@ app.post("/api/contact", async (req, res) => {
       subject: subject || 'No subject',
       messageLength: message.length,
       adminNotified: true,
-      userNotified: true,
-      timestamp: new Date().toISOString()
-    });
-
-    res.json({
-      success: true,
-      message: "Thank you for your message! We have received it and will get back to you within 24-48 hours.",
-      emails: {
-        admin: "Notification sent to support team",
-        confirmation: "Confirmation sent to your email"
-      }
-    });
-
-  } catch (error) {
-    console.error("❌ Contact form error:", error);
-    res.status(500).json({
-      error: "Failed to send message. Please try again or contact us directly.",
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
       userNotified: true,
       timestamp: new Date().toISOString()
     });
