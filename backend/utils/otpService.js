@@ -262,6 +262,9 @@ const cleanupExpiredOTPs = async () => {
   }
 };
 
+// If you ever need to generate a backend link in an email, use:
+const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
+
 module.exports = {
   generateOTP,
   createOTP,

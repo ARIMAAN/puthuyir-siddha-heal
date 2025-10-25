@@ -68,7 +68,17 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+// Helper to get frontend and backend URLs from env
+const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const BACKEND_BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
+
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL || "http://localhost:5173",
+    "http://localhost:5173"
+  ],
+  credentials: true
+}));
 app.use(bodyParser.json());
 app.use(session({ 
   secret: process.env.SESSION_SECRET, 
@@ -84,9 +94,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 require("./utils/passportGoogle")(passport);
-
-// Helper to get frontend URL
-const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || "http://localhost:5173";
 
 // Utility function to generate booking token
 const generateBookingToken = () => {
