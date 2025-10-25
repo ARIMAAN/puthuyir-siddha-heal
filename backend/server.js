@@ -44,6 +44,30 @@ connectDB();
 
 const app = express();
 
+// Development-only Content-Security-Policy helper
+// The browser may block DevTools or extension requests (like
+// /.well-known/appspecific/com.chrome.devtools.json) when a
+// very restrictive CSP is in effect. During local development we
+// relax connect-src to allow the frontend (Vite) and the backend
+// to communicate. This middleware only runs when NODE_ENV !== 'production'.
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    // Allow connections to the backend dev server and Vite HMR websocket.
+    // Keep the policy as restrictive as practical while enabling dev tooling.
+    const policy = [
+      "default-src 'self'",
+      "connect-src 'self' http://localhost:5000 ws://localhost:5173 ws://localhost:5174",
+      "img-src 'self' data: https:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com"
+    ].join('; ');
+
+    res.setHeader('Content-Security-Policy', policy);
+    next();
+  });
+}
+
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(bodyParser.json());
 app.use(session({ 
@@ -60,6 +84,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 require("./utils/passportGoogle")(passport);
+
+// Helper to get frontend URL
+const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || "http://localhost:5173";
 
 // Utility function to generate booking token
 const generateBookingToken = () => {
@@ -115,7 +142,7 @@ app.get("/auth/google/callback",
           { expiresIn: "10m" }
         );
         
-        res.redirect(`/auth/verify-oauth?temp_token=${tempToken}&email=${encodeURIComponent(user.email)}&new_user=${!user.account_verified}`);
+        res.redirect(`${FRONTEND_BASE_URL}/auth/verify-oauth?temp_token=${tempToken}&email=${encodeURIComponent(user.email)}&new_user=${!user.account_verified}`);
       } else {
         // Verified user - direct login
         const token = jwt.sign(
@@ -137,14 +164,14 @@ app.get("/auth/google/callback",
         });
         
         if (profileComplete) {
-          res.redirect(`/signin?token=${token}&name=${encodeURIComponent(user.full_name)}`);
+          res.redirect(`${FRONTEND_BASE_URL}/signin?token=${token}&name=${encodeURIComponent(user.full_name)}`);
         } else {
-          res.redirect(`/signin?token=${token}&name=${encodeURIComponent(user.full_name)}&redirect=profile`);
+          res.redirect(`${FRONTEND_BASE_URL}/signin?token=${token}&name=${encodeURIComponent(user.full_name)}&redirect=profile`);
         }
       }
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect(`/signin?error=oauth_failed`);
+      res.redirect(`${FRONTEND_BASE_URL}/signin?error=oauth_failed`);
     }
   }
 );
@@ -406,7 +433,7 @@ app.post("/api/profile", async (req, res) => {
     
     // Handle password update in User model if provided
     if (req.body.password) {
-      const user = await User.findById(userId);
+      const user = await User.findById(req.userId);
       if (user) {
         user.password_hash = req.body.password; // Will be hashed by pre-save middleware
         await user.save();
@@ -416,7 +443,7 @@ app.post("/api/profile", async (req, res) => {
     
     // Handle email update in User model if provided
     if (req.body.email_address) {
-      const user = await User.findById(userId);
+      const user = await User.findById(req.userId);
       if (user) {
         user.email = req.body.email_address;
         await user.save();
@@ -425,7 +452,7 @@ app.post("/api/profile", async (req, res) => {
     
     // Handle phone update in User model if provided
     if (req.body.contact_number) {
-      const user = await User.findById(userId);
+      const user = await User.findById(req.userId);
       if (user) {
         user.phone = req.body.contact_number;
         await user.save();
@@ -433,9 +460,9 @@ app.post("/api/profile", async (req, res) => {
     }
     
     // Update patient profile
-    let patient = await Patient.findOne({ user_id: userId });
+    let patient = await Patient.findOne({ user_id: req.userId });
     if (!patient) {
-      patient = new Patient({ user_id: userId });
+      patient = new Patient({ user_id: req.userId });
     }
     
     console.log("💾 Profile POST - Date of birth received:", {
@@ -449,7 +476,7 @@ app.post("/api/profile", async (req, res) => {
     
     // Update profile_completed flag in User model if profile is marked as completed
     if (req.body.profile_completed) {
-      const user = await User.findById(userId);
+      const user = await User.findById(req.userId);
       if (user) {
         user.profile_completed = true;
         await user.save();
