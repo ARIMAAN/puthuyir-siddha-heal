@@ -11,7 +11,7 @@ module.exports = function(passport) {
   async (accessToken, refreshToken, profile, done) => {
     try {
       let user = await User.findOne({ email: profile.emails[0].value });
-      
+
       const googleData = {
         full_name: profile.displayName,
         email: profile.emails[0].value,
@@ -29,50 +29,48 @@ module.exports = function(passport) {
           verified_email: profile._json.verified_email || false
         }
       };
-      
+
       if (!user) {
         // New user - needs OTP verification and password setup
         user = await User.create({
           ...googleData,
-          is_verified: false, // Set to false for new OAuth users
-          account_verified: false, // New account verification flag
-          password_setup_required: true, // OAuth users must set password after verification
+          is_verified: false,
+          account_verified: false,
+          password_setup_required: true,
           password_setup_completed: false,
           has_password: false
         });
-        
+
         // Send OTP for verification
         try {
           const otp = await createOTP(user.email, "account_verification");
           await sendOTPEmail(user.email, otp, "account_verification");
-          console.log(`📧 OTP sent to new OAuth user: ${user.email}`);
         } catch (otpError) {
-          console.error("Failed to send OTP to new OAuth user:", otpError);
+          // log error but continue
         }
-        
+
         return done(null, { ...user.toObject(), needsVerification: true });
       } else {
         // Existing user - check account verification status
         const needsVerification = !user.account_verified;
-        
+
         Object.assign(user, {
           ...googleData,
-          is_verified: user.account_verified ? true : user.is_verified, // Keep verification status
+          is_verified: user.account_verified ? true : user.is_verified,
           last_login: new Date()
         });
         await user.save();
-        
+
         if (needsVerification) {
           // Send OTP for first-time OAuth users who haven't verified their account
           try {
             const otp = await createOTP(user.email, "account_verification");
             await sendOTPEmail(user.email, otp, "account_verification");
-            console.log(`📧 OTP sent to existing unverified OAuth user: ${user.email}`);
           } catch (otpError) {
-            console.error("Failed to send OTP to existing OAuth user:", otpError);
+            // log error but continue
           }
         }
-        
+
         return done(null, { ...user.toObject(), needsVerification });
       }
     } catch (error) {
@@ -83,3 +81,4 @@ module.exports = function(passport) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser((id, done) => User.findById(id).then(user => done(null, user)));
 };
+

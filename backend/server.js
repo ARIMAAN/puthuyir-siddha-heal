@@ -44,30 +44,6 @@ connectDB();
 
 const app = express();
 
-// Development-only Content-Security-Policy helper
-// The browser may block DevTools or extension requests (like
-// /.well-known/appspecific/com.chrome.devtools.json) when a
-// very restrictive CSP is in effect. During local development we
-// relax connect-src to allow the frontend (Vite) and the backend
-// to communicate. This middleware only runs when NODE_ENV !== 'production'.
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
-    // Allow connections to the backend dev server and Vite HMR websocket.
-    // Keep the policy as restrictive as practical while enabling dev tooling.
-    const policy = [
-      "default-src 'self'",
-      "connect-src 'self' http://localhost:5000 ws://localhost:5173 ws://localhost:5174",
-      "img-src 'self' data: https:",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com"
-    ].join('; ');
-
-    res.setHeader('Content-Security-Policy', policy);
-    next();
-  });
-}
-
 // Helper to get frontend and backend URLs from env
 const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const BACKEND_BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
@@ -1400,6 +1376,30 @@ app.post("/api/contact", async (req, res) => {
       subject: subject || 'No subject',
       messageLength: message.length,
       adminNotified: true,
+      userNotified: true,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({
+      success: true,
+      message: "Thank you for your message! We have received it and will get back to you within 24-48 hours.",
+      emails: {
+        admin: "Notification sent to support team",
+        confirmation: "Confirmation sent to your email"
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Contact form error:", error);
+    res.status(500).json({
+      error: "Failed to send message. Please try again or contact us directly.",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
       userNotified: true,
       timestamp: new Date().toISOString()
     });
