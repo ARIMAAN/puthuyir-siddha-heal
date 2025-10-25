@@ -48,17 +48,27 @@ const app = express();
 const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const BACKEND_BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
-// Update CORS configuration
+// Update CORS configuration to allow only the deployed frontend and localhost for dev
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://puthuyir-siddha-medicine.vercel.app',
+  'http://localhost:5173'
+];
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL,
-    'https://puthuyir-siddha-medicine.vercel.app',
-    'http://localhost:5173'
-  ],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle preflight requests for all routes
+app.options('*', cors());
+
 app.use(bodyParser.json());
 app.use(session({ 
   secret: process.env.SESSION_SECRET, 
