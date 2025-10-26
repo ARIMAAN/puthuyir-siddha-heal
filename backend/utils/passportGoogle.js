@@ -3,20 +3,28 @@ const User = require("../models/User");
 const { createOTP, sendOTPEmail } = require("./otpService");
 
 module.exports = function(passport) {
-  // Fallback to production URL if BACKEND_URL is not set
+  // Always use production URL if BACKEND_URL is not set
   const backendUrl =
     process.env.BACKEND_URL ||
     "https://puthuyir-siddha-heal-backend.vercel.app";
-
   const callbackURL = `${backendUrl}/auth/google/callback`;
+
+  // Log for debugging
   console.log("Google OAuth callbackURL:", callbackURL);
+  console.log("process.env.BACKEND_URL:", process.env.BACKEND_URL);
+
+  // IMPORTANT:
+  // Make sure the following redirect URI is registered in your Google Cloud Console:
+  // For production: https://puthuyir-siddha-heal-backend.vercel.app/auth/google/callback
+  // For local dev:  http://localhost:5000/auth/google/callback
 
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL
+    callbackURL,
+    passReqToCallback: true // Pass the request object to include the state parameter
   },
-  async (accessToken, refreshToken, profile, done) => {
+  async (req, accessToken, refreshToken, profile, done) => {
     try {
       let user = await User.findOne({ email: profile.emails[0].value });
 
@@ -76,5 +84,11 @@ module.exports = function(passport) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser((id, done) => User.findById(id).then(user => done(null, user)));
 };
+
+// Add state parameter to Google OAuth authentication route
+passport.authenticate("google", {
+  scope: ["profile", "email"],
+  state: true // Enable the state parameter to prevent CSRF attacks
+});
 
 
