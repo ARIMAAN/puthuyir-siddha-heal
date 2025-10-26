@@ -4,20 +4,18 @@ const User = require("../models/User");
 const { createOTP, sendOTPEmail } = require("./otpService");
 
 module.exports = function(passport) {
-  // Always use production URL if BACKEND_URL is not set
-  const backendUrl =
-    process.env.BACKEND_URL ||
-    "https://puthuyir-siddha-heal-backend.vercel.app";
+  const PROD_URL = "https://puthuyir-siddha-heal-backend.vercel.app";
+  const DEV_URL = "http://localhost:5000";
+
+  // Use BACKEND_URL from env, fallback to PROD_URL if not in development
+  const backendUrl = process.env.NODE_ENV === 'development'
+    ? process.env.BACKEND_URL || DEV_URL
+    : PROD_URL;
+
   const callbackURL = `${backendUrl}/auth/google/callback`;
 
-  // Log for debugging
+  console.log("Environment:", process.env.NODE_ENV);
   console.log("Google OAuth callbackURL:", callbackURL);
-  console.log("process.env.BACKEND_URL:", process.env.BACKEND_URL);
-
-  // IMPORTANT:
-  // Make sure the following redirect URI is registered in your Google Cloud Console:
-  // For production: https://puthuyir-siddha-heal-backend.vercel.app/auth/google/callback
-  // For local dev:  http://localhost:5000/auth/google/callback
 
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
