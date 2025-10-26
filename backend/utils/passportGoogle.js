@@ -3,10 +3,18 @@ const User = require("../models/User");
 const { createOTP, sendOTPEmail } = require("./otpService");
 
 module.exports = function(passport) {
+  // Fallback to production URL if BACKEND_URL is not set
+  const backendUrl =
+    process.env.BACKEND_URL ||
+    "https://puthuyir-siddha-heal-backend.vercel.app";
+
+  const callbackURL = `${backendUrl}/auth/google/callback`;
+  console.log("Google OAuth callbackURL:", callbackURL);
+
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${process.env.BACKEND_URL}/auth/google/callback`
+    callbackURL
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
