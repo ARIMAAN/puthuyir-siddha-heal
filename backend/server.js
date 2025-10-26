@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const session = require("express-session");
 const mongoose = require("mongoose");
+const MongoStore = require('connect-mongo');
 require("dotenv").config();
 
 // Models
@@ -74,6 +75,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET, 
   resave: false, 
   saveUninitialized: true,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60 // 14 days
+  }),
   cookie: { 
     maxAge: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
     httpOnly: true,
