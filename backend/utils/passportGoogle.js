@@ -4,24 +4,25 @@ const User = require("../models/User");
 const { createOTP, sendOTPEmail } = require("./otpService");
 
 module.exports = function(passport) {
+  // Use environment variables with fallbacks
   const PROD_URL = "https://puthuyir-siddha-heal-backend.vercel.app";
   const DEV_URL = "http://localhost:5000";
-
-  // Use BACKEND_URL from env, fallback to PROD_URL if not in development
-  const backendUrl = process.env.NODE_ENV === 'development'
-    ? process.env.BACKEND_URL || DEV_URL
-    : PROD_URL;
-
+  
+  const backendUrl = process.env.NODE_ENV === 'production' ? PROD_URL : DEV_URL;
   const callbackURL = `${backendUrl}/auth/google/callback`;
 
+  // Debug logging
   console.log("Environment:", process.env.NODE_ENV);
-  console.log("Google OAuth callbackURL:", callbackURL);
+  console.log("Backend URL:", backendUrl);
+  console.log("Callback URL:", callbackURL);
+  console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID ? "Set" : "Not Set");
+  console.log("Google Client Secret:", process.env.GOOGLE_CLIENT_SECRET ? "Set" : "Not Set");
 
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL,
-    passReqToCallback: true // Pass the request object to include the state parameter
+    callbackURL: callbackURL,
+    passReqToCallback: true
   },
   async (req, accessToken, refreshToken, profile, done) => {
     try {
@@ -76,6 +77,7 @@ module.exports = function(passport) {
         return done(null, { ...user.toObject(), needsVerification });
       }
     } catch (error) {
+      console.error("Google Strategy Error:", error);
       return done(error, null);
     }
   }));
