@@ -31,7 +31,6 @@ module.exports = function(passport) {
       };
 
       if (!user) {
-        // New user - needs OTP verification and password setup
         user = await User.create({
           ...googleData,
           is_verified: false,
@@ -40,37 +39,25 @@ module.exports = function(passport) {
           password_setup_completed: false,
           has_password: false
         });
-
-        // Send OTP for verification
         try {
           const otp = await createOTP(user.email, "account_verification");
           await sendOTPEmail(user.email, otp, "account_verification");
-        } catch (otpError) {
-          // log error but continue
-        }
-
+        } catch {}
         return done(null, { ...user.toObject(), needsVerification: true });
       } else {
-        // Existing user - check account verification status
         const needsVerification = !user.account_verified;
-
         Object.assign(user, {
           ...googleData,
           is_verified: user.account_verified ? true : user.is_verified,
           last_login: new Date()
         });
         await user.save();
-
         if (needsVerification) {
-          // Send OTP for first-time OAuth users who haven't verified their account
           try {
             const otp = await createOTP(user.email, "account_verification");
             await sendOTPEmail(user.email, otp, "account_verification");
-          } catch (otpError) {
-            // log error but continue
-          }
+          } catch {}
         }
-
         return done(null, { ...user.toObject(), needsVerification });
       }
     } catch (error) {
@@ -81,4 +68,5 @@ module.exports = function(passport) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser((id, done) => User.findById(id).then(user => done(null, user)));
 };
+
 
