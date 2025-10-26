@@ -167,7 +167,7 @@ app.get("/auth/google/callback",
         }
       }
     } catch (error) {
-      console.error("OAuth callback error:", error);
+      console.error("OAuth callback error:", error); // Log the error
       res.redirect(`${FRONTEND_BASE_URL}/signin?error=oauth_failed`);
     }
   }
@@ -1414,3 +1414,13 @@ app.post("/api/contact", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Global error handler for unhandled exceptions
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1); // Exit the process to avoid undefined behavior
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
