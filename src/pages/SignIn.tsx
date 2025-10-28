@@ -246,8 +246,9 @@ const SignIn = () => {
   };
 
   const handleGoogleSignIn = () => {
-    const apiBaseUrl = getApiBaseUrl();
-    window.location.href = `${apiBaseUrl}/auth/google`;
+    // Use a relative path to ensure the request is handled by the current host
+    // and correctly proxied by the Vite dev server.
+    window.location.href = `/api/auth/google`;
   };
 
   const passwordValidation = validatePassword(registerData.password);
