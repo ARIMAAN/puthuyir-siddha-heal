@@ -32,6 +32,14 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
 
+  const getApiBaseUrl = () => {
+    const envApiUrl = (import.meta.env.VITE_API_URL || "").trim();
+    if (envApiUrl) {
+      return envApiUrl.replace(/\/$/, "");
+    }
+    return `${window.location.origin}/api`;
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
@@ -238,7 +246,8 @@ const SignIn = () => {
   };
 
   const handleGoogleSignIn = () => {
-    window.location.href = `/api/auth/google`;
+    const apiBaseUrl = getApiBaseUrl();
+    window.location.href = `${apiBaseUrl}/auth/google`;
   };
 
   const passwordValidation = validatePassword(registerData.password);
