@@ -42,10 +42,13 @@ const consultantRoutes = require('./routes/consultant.routes');
 // Import middleware
 const errorHandler = require('./middleware/error.middleware');
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// Health check endpoints (support both direct and prefixed calls)
+const healthHandler = (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // Handle OPTIONS requests for CORS preflight
 app.options('*', (req, res) => {
