@@ -32,13 +32,6 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
 
-  const getApiBaseUrl = () => {
-    const envApiUrl = (import.meta.env.VITE_API_URL || "").trim();
-    if (envApiUrl) {
-      return envApiUrl.replace(/\/$/, "");
-    }
-    return `${window.location.origin}/api`;
-  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -246,9 +239,8 @@ const SignIn = () => {
   };
 
   const handleGoogleSignIn = () => {
-    // Use a relative path to ensure the request is handled by the current host
-    // and correctly proxied by the Vite dev server.
-    window.location.href = `/api/auth/google`;
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/api/auth/google`;
   };
 
   const passwordValidation = validatePassword(registerData.password);
