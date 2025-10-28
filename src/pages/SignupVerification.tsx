@@ -53,7 +53,7 @@ const SignupVerification = () => {
     setLoading(true);
 
     try {
-      const response = await apiClient.post("/api/auth/verify-otp", {
+      const response = await apiClient.post("/auth/verify-otp", {
         email,
         otp,
         purpose: "account_verification"
@@ -94,7 +94,7 @@ const SignupVerification = () => {
     setResending(true);
     
     try {
-      await apiClient.post("/api/auth/resend-otp", {
+      await apiClient.post("/auth/resend-otp", {
         email,
         purpose: "account_verification"
       });

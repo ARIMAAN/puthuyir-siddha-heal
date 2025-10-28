@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import apiClient from "@/utils/apiClient";
 import { useNavigate, useLocation } from "react-router-dom";
 
 function isSignedIn() { return !!localStorage.getItem("token"); }
@@ -43,13 +44,17 @@ const Consultant = () => {
     if (!isProfileComplete()) { alert("Complete your profile first."); navigate("/profile"); return; }
 
     const token = localStorage.getItem("token");
-    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/book`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ consultant: consultant.name, slot: "10:00 AM", date: new Date().toISOString().slice(0, 10) }),
+    const response = await apiClient.post("/book", {
+      consultant: consultant.name,
+      slot: "10:00 AM",
+      date: new Date().toISOString().slice(0, 10)
     });
 
-    if (res.ok) setBookingConfirmed(true); else alert("Booking failed.");
+    if (response.data.success) {
+      setBookingConfirmed(true);
+    } else {
+      alert(response.data.error || "Booking failed.");
+    }
   };
 
   if (bookingConfirmed) return (

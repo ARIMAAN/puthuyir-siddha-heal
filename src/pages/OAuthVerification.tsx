@@ -32,7 +32,7 @@ const OAuthVerification = () => {
     setLoading(true);
 
     try {
-      const response = await apiClient.post("/api/auth/verify-oauth-otp", {
+      const response = await apiClient.post("/auth/verify-oauth-otp", {
         temp_token: tempToken,
         otp,
         email
@@ -74,7 +74,7 @@ const OAuthVerification = () => {
     setResending(true);
     
     try {
-      await apiClient.post("/api/auth/resend-oauth-otp", {
+      await apiClient.post("/auth/resend-oauth-otp", {
         temp_token: tempToken,
         email
       });

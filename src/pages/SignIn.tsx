@@ -53,7 +53,7 @@ const SignIn = () => {
         localStorage.setItem("profileComplete", "true");
         
         // Double-check profile completion status from API
-        apiClient.get("/api/profile")
+        apiClient.get("/profile")
           .then(response => {
             const profileData = response.data;
             const isComplete = profileData && 
@@ -135,7 +135,7 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      const response = await apiClient.post("/api/auth/login", {
+      const response = await apiClient.post("/auth/login", {
         email: signInData.email,
         password: signInData.password
       });
@@ -203,7 +203,7 @@ const SignIn = () => {
         phone: registerData.phone
       });
 
-      const response = await apiClient.post("/api/auth/register", {
+      const response = await apiClient.post("/auth/register", {
         full_name: registerData.full_name,
         email: registerData.email,
         password: registerData.password,
@@ -238,7 +238,7 @@ const SignIn = () => {
   };
 
   const handleGoogleSignIn = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/auth/google`;
+    window.location.href = `/api/auth/google`;
   };
 
   const passwordValidation = validatePassword(registerData.password);

@@ -3,8 +3,9 @@ import { logout, checkTokenExpiry } from './sessionManager';
 
 // Create axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  timeout: 30000, // 30 seconds to handle email sending
+  withCredentials: true, // Include credentials for CORS
 });
 
 // Request interceptor to add auth token and check expiry

@@ -77,7 +77,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      await apiClient.post("/api/auth/forgot-password", { email });
+      await apiClient.post("/auth/forgot-password", { email });
       toast.success("OTP sent to your email");
       setStep('otp');
       startCountdown();
@@ -94,7 +94,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      await apiClient.post("/api/auth/verify-forgot-password-otp", {
+      await apiClient.post("/auth/verify-forgot-password-otp", {
         email,
         otp
       });
@@ -135,7 +135,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      await apiClient.post("/api/auth/reset-password", {
+      await apiClient.post("/auth/reset-password", {
         email,
         otp,
         newPassword
@@ -154,7 +154,7 @@ const ForgotPassword = () => {
     setResending(true);
     
     try {
-      await apiClient.post("/api/auth/forgot-password", { email });
+      await apiClient.post("/auth/forgot-password", { email });
       toast.success("New OTP sent to your email");
       setAttempts(0);
       setOtp("");

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Shield, Mail } from "lucide-react";
+import apiClient from "@/utils/apiClient";
 
 const OAuthVerify = () => {
   const navigate = useNavigate();
@@ -52,39 +53,23 @@ const OAuthVerify = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/verify-oauth`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          temp_token: tempToken,
-          otp: otp
-        })
+      const response = await apiClient.post("/auth/verify-oauth", {
+        temp_token: tempToken,
+        otp: otp
       });
 
-      const data = await response.json();
-      
+      const data = response.data;
+
       if (data.success && data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userName", data.name);
-        
-        // Check if profile is complete
-        const profileResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/profile`, {
-          headers: { Authorization: `Bearer ${data.token}` }
-        });
-        
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          if (profileData && profileData.profile_completed) {
-            localStorage.setItem("profileComplete", "true");
-            toast.success("Welcome back!");
-            navigate("/dashboard");
-          } else {
-            localStorage.setItem("profileComplete", "false");
-            toast.success("Please complete your profile to continue.");
-            navigate("/profile");
-          }
+
+        // The profile check is now handled by the login flow, so we can simplify this.
+        if (data.profileComplete) {
+          localStorage.setItem("profileComplete", "true");
+          toast.success("Welcome back!");
+          navigate("/dashboard");
         } else {
-          // No profile exists, redirect to profile creation
           localStorage.setItem("profileComplete", "false");
           toast.success("Please complete your profile to continue.");
           navigate("/profile");
@@ -101,21 +86,16 @@ const OAuthVerify = () => {
 
   const resendOTP = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email,
-          purpose: "login_verification"
-        })
+      const response = await apiClient.post("/auth/send-otp", {
+        email: email,
+        purpose: "login_verification"
       });
 
-      const data = await response.json();
-      if (response.ok) {
+      if (response.data.success) {
         setCountdown(300);
         toast.success("New OTP sent to your email");
       } else {
-        toast.error(data.error || "Failed to resend OTP");
+        toast.error(response.data.error || "Failed to resend OTP");
       }
     } catch (error) {
       toast.error("Failed to resend OTP");

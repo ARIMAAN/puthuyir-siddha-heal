@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Calendar, Clock, User, Phone, Mail, MapPin, Video, MessageSquare, Shield } from "lucide-react";
+import { Calendar, User, Phone, Mail, MapPin, Shield } from "lucide-react";
 import apiClient from "@/utils/apiClient";
 
 interface Booking {
@@ -14,8 +14,6 @@ interface Booking {
     specialty?: string;
   };
   appointment_date: string;
-  appointment_time: string;
-  consultation_type: string;
   symptoms: string;
   patient_name: string;
   patient_email: string;
@@ -50,8 +48,8 @@ const Dashboard = () => {
   useEffect(() => {
     // Fetch both user data and bookings
     Promise.all([
-      apiClient.get("/api/user"),
-      apiClient.get("/api/bookings")
+      apiClient.get("/user"),
+      apiClient.get("/bookings")
     ])
       .then(([userResponse, bookingsResponse]) => {
         setUserData(userResponse.data);
@@ -63,14 +61,6 @@ const Dashboard = () => {
         setLoading(false);
       });
   }, []);
-
-  const getConsultationIcon = (type: string) => {
-    switch (type) {
-      case "video": return <Video className="w-4 h-4" />;
-      case "audio": return <Phone className="w-4 h-4" />;
-      default: return <MessageSquare className="w-4 h-4" />;
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -196,16 +186,6 @@ const Dashboard = () => {
                             {booking.appointment_date 
                               ? new Date(booking.appointment_date).toLocaleDateString()
                               : "Date not set"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="w-4 h-4 text-muted-foreground" />
-                          <span>{booking.appointment_time || "Time not set"}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          {getConsultationIcon(booking.consultation_type)}
-                          <span className="capitalize">
-                            {booking.consultation_type || "chat"} consultation
                           </span>
                         </div>
                       </div>

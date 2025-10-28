@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Mail, Phone, MapPin, Send, Linkedin, Instagram, Facebook } from "lucide-react";
 import { FaTelegram, FaPinterest, FaWhatsapp } from "react-icons/fa";
 import { useLanguage } from "@/contexts/LanguageContext";
+import apiClient from "@/utils/apiClient";
 
 // Contact page translations
 const contactTranslations = {
@@ -74,22 +75,18 @@ const Contact = () => {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          name: formData.get("name"), 
-          email: formData.get("email"), 
-          subject: formData.get("subject"),
-          message: formData.get("message") 
-        }),
+      const response = await apiClient.post("/contact", {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        subject: formData.get("subject"),
+        message: formData.get("message")
       });
 
-      if (response.ok) {
+      if (response.data.success) {
         setSent(true);
         form.reset();
       } else {
-        setError("Failed to send message. Please try again.");
+        setError(response.data.error || "Failed to send message. Please try again.");
       }
     } catch (err) {
       setError("Failed to send message. Please try again.");

@@ -71,7 +71,7 @@ const PasswordSetup = () => {
     }
 
     try {
-      const response = await apiClient.post("/api/auth/setup-password", {
+      const response = await apiClient.post("/auth/setup-password", {
         password: formData.password,
         confirmPassword: formData.confirmPassword
       });

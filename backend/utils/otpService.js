@@ -64,7 +64,9 @@ const verifyOTP = async (email, otp, purpose, markAsUsed = true) => {
       throw new Error("Invalid or expired OTP");
     }
 
-    if (otpDoc.is_used && markAsUsed) {
+    // Only check if OTP is used when we're about to mark it as used
+    // This allows verification calls (markAsUsed=false) to succeed even if OTP was previously verified
+    if (markAsUsed && otpDoc.is_used) {
       throw new Error("OTP has already been used");
     }
 
@@ -100,9 +102,9 @@ const sendOTPEmail = async (email, otp, purpose) => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       },
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 5000,    // 5 seconds
-      socketTimeout: 10000      // 10 seconds
+      connectionTimeout: 15000, // 15 seconds
+      greetingTimeout: 10000,   // 10 seconds
+      socketTimeout: 15000      // 15 seconds
     });
 
     // Email content based on purpose
@@ -203,7 +205,7 @@ const sendOTPEmail = async (email, otp, purpose) => {
 
     // Add timeout to prevent hanging
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Email sending timeout')), 10000); // 10 second timeout
+      setTimeout(() => reject(new Error('Email sending timeout')), 20000); // 20 second timeout
     });
 
     const info = await Promise.race([emailPromise, timeoutPromise]);

@@ -114,8 +114,8 @@ const Profile = () => {
       try {
         // Fetch both user data and patient profile
         const [userResponse, profileResponse] = await Promise.all([
-          apiClient.get("/api/user"),
-          apiClient.get("/api/profile").catch(() => ({ data: null }))
+          apiClient.get("/user"),
+          apiClient.get("/profile").catch(() => ({ data: null }))
         ]);
 
         const userDataResponse = userResponse.data;
@@ -290,7 +290,7 @@ const Profile = () => {
   // Send OTP for verification
   const sendOTP = async (type: 'email') => {
     try {
-      await apiClient.post("/api/auth/send-otp", { 
+      await apiClient.post("/auth/send-otp", { 
         email: profile.email_address, 
         purpose: "profile_update" 
       });
@@ -318,7 +318,7 @@ const Profile = () => {
     setOtpState(prev => ({ ...prev, loading: true }));
     
     try {
-      await apiClient.post("/api/auth/verify-otp", { 
+      await apiClient.post("/auth/verify-otp", { 
         email: profile.email_address, 
         otp: otpState.otp, 
         purpose: "profile_update" 
@@ -344,7 +344,7 @@ const Profile = () => {
     }
     
     try {
-      await apiClient.post("/api/profile", { ...profile, ...updateData, profile_completed: true });
+      await apiClient.post("/profile", { ...profile, ...updateData, profile_completed: true });
       
       toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully!`);
       setOriginalProfile({ ...profile, ...updateData });
@@ -399,7 +399,7 @@ const Profile = () => {
       }
       
       // Save profile data
-      await apiClient.post("/api/profile", { ...profile, profile_completed: true });
+      await apiClient.post("/profile", { ...profile, profile_completed: true });
       
       
       localStorage.setItem("profileComplete", "true");

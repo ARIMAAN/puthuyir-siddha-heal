@@ -8,19 +8,20 @@ import { toast } from "sonner";
 import { User, Calendar, FileText, Phone, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import apiClient from "@/utils/apiClient";
 
 const consultationTranslations = {
   en: {
     title: "Book Online Consultation",
     subtitle: "Book your personalized Siddha consultation now",
     name: "Name",
+    namePlaceholder: "Enter your full name",
     age: "Age",
     gender: "Gender",
     phone: "Phone Number",
     email: "Email",
     symptoms: "Your Symptoms",
     preferredDate: "Preferred Date",
-    preferredTime: "Preferred Time",
     submit: "Submit",
     booking: "Booking...",
     success: "Your appointment has been booked successfully!",
@@ -42,7 +43,6 @@ const consultationTranslations = {
     email: "மின்னஞ்சல்",
     symptoms: "உங்கள் அறிகுறிகள்",
     preferredDate: "விருப்பமான தேதி",
-    preferredTime: "விருப்பமான நேரம்",
     submit: "பதிவுசெய்யவும்",
     booking: "பதிவு செய்கிறது...",
     success: "உங்கள் ஆலோசனை பதிவு வெற்றிகரமாக செய்யப்பட்டது!",
@@ -87,7 +87,7 @@ const steps = [
 
 const BookAppointment = () => {
   const { language } = useLanguage();
-  const t = consultationTranslations[language];
+    const t = consultationTranslations[language];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -107,27 +107,22 @@ const BookAppointment = () => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    if (token && user) {
+    if (token) {
       fetchUserData();
     }
-  }, [token, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data);
-        // Pre-populate form with user data
+      const response = await apiClient.get("/user");
+      if (response.data) {
+        setUserData(response.data);
         setFormData(prev => ({
           ...prev,
-          name: prev.name || data.full_name || "",
-          email: prev.email || data.email || "",
-          phone: prev.phone || data.phone || ""
+          name: prev.name || response.data.full_name || "",
+          email: prev.email || response.data.email || "",
+          phone: prev.phone || response.data.phone || ""
         }));
       }
     } catch (error) {
@@ -146,31 +141,24 @@ const BookAppointment = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/book`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          consultant: "Dr. Dhivyadharshini",
-          preferredDate: formData.preferredDate,
-          symptoms: formData.symptoms,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-        }),
+
+      const response = await apiClient.post("/bookings", {
+        appointment_date: formData.preferredDate,
+        symptoms: formData.symptoms,
+        patient_name: formData.name,
+        patient_email: formData.email,
+        patient_phone: formData.phone,
       });
 
-      const data = await response.json();
-      if (response.ok) {
+      if (response.data.success) {
         setShowSuccessModal(true);
       } else {
-        toast.error(data.error || t.error);
+        toast.error(response.data.error || t.error);
       }
     } catch (err) {
-      console.error("Booking submission error:", err);
-      toast.error(t.error);
+      const errorMsg = err.response?.data?.error || err.message || t.error;
+      console.error("Booking submission error:", errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -231,23 +219,15 @@ const BookAppointment = () => {
               <Card className="border-2">
                 <CardContent className="p-8">
                   <form onSubmit={handleSubmit} className="space-y-8">
-
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <User className="w-5 h-5 text-primary" />
-                        {t.name}
-                      </h3>
-
+  
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Name */}
                       <div className="space-y-2">
-                        <Label htmlFor="name">{t.name} *</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          placeholder={t.name}
-                          required
-                        />
+                        <Label htmlFor="name" className="flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          {t.name}
+                        </Label>
+                        <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Enter your full name" required />
                       </div>
                     </div>
 
@@ -312,6 +292,7 @@ const BookAppointment = () => {
                           required
                         />
                       </div>
+
                     </div>
 
                     <div className="space-y-4">
