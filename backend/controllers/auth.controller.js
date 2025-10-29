@@ -186,11 +186,26 @@ exports.setupPassword = async (req, res) => {
 exports.googleCallback = async (req, res) => {
   try {
     const user = req.user;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+    // If user is new and needs OTP verification
+    if (user.needsVerification) {
+      const redirectUrl = `${frontendUrl}/auth/verify-signup?email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(user.full_name)}&oauth=true`;
+      return res.redirect(redirectUrl);
+    }
+
+    // If user is existing, generate token and redirect to sign-in handler
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '3h' });
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    res.redirect(`${frontendUrl}/signin?token=${token}&name=${encodeURIComponent(user.full_name)}`);
+    
+    // Determine where to redirect on the frontend
+    const redirectPath = user.profile_completed ? 'dashboard' : 'profile';
+    
+    const redirectUrl = `${frontendUrl}/signin?token=${token}&name=${encodeURIComponent(user.full_name)}&redirect=${redirectPath}`;
+    res.redirect(redirectUrl);
+
   } catch (error) {
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    console.error('Google Callback Error:', error);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     res.redirect(`${frontendUrl}/signin?error=oauth_failed`);
   }
 };
