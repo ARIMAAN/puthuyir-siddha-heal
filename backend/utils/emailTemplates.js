@@ -72,8 +72,28 @@ const getContactFormEmailHtml = (data) => `
   </div>
 `;
 
+const getAdminEmailHtml = (data) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h2 style="color: #f59e0b;">📢 New Booking System Alert</h2>
+    <p>A new appointment has been booked in the system.</p>
+    
+    <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fef3c7;">
+      <h3 style="margin-top: 0; color: #d97706;">Booking Details:</h3>
+      <p><strong>🔑 Booking Token:</strong> ${data.bookingToken}</p>
+      <p><strong>👨‍⚕️ Consultant:</strong> ${data.consultant.name}</p>
+      <p><strong>👤 Patient:</strong> ${data.patient.full_name}</p>
+      <p><strong>📧 Patient Email:</strong> ${data.patient.email}</p>
+      <p><strong>📱 Patient Phone:</strong> ${data.patient.phone || 'Not provided'}</p>
+      <p><strong>📅 Preferred Date:</strong> ${new Date(data.preferredDate).toLocaleDateString()}</p>
+    </div>
+
+    <p>This is an automated alert from the Puthuyir Healthcare System.</p>
+  </div>
+`;
+
 module.exports = {
   getPatientEmailHtml,
   getConsultantEmailHtml,
-  getContactFormEmailHtml
+  getContactFormEmailHtml,
+  getAdminEmailHtml
 };

@@ -1,7 +1,7 @@
 const Booking = require('../models/Booking');
 const Patient = require('../models/Patient');
 const Consultant = require('../models/Consultant');
-const { getPatientEmailHtml, getConsultantEmailHtml } = require('../utils/emailTemplates');
+const { getPatientEmailHtml, getConsultantEmailHtml, getAdminEmailHtml } = require('../utils/emailTemplates');
 const nodemailer = require('nodemailer');
 
 // Ensure there's at least one consultant available for bookings
@@ -73,6 +73,24 @@ const sendBookingEmails = async (bookingData) => {
       }
     } else {
       console.log('⚠️ Doctor email not available, skipping doctor notification');
+    }
+
+    // Send email to admin
+    const adminEmail = process.env.CONTACT_RECEIVER || process.env.SMTP_USER;
+    if (adminEmail) {
+      try {
+        await transporter.sendMail({
+          from: `"Puthuyir System Alert" <${process.env.SMTP_USER}>`,
+          to: adminEmail,
+          subject: '📢 New Booking Alert - Puthuyir Healthcare',
+          html: getAdminEmailHtml(bookingData)
+        });
+        console.log(`📧 Booking alert sent to admin: ${adminEmail}`);
+      } catch (error) {
+        console.error('❌ Failed to send email to admin:', error.message);
+      }
+    } else {
+      console.log('⚠️ Admin email not configured, skipping admin notification');
     }
 
   } catch (error) {
@@ -165,7 +183,10 @@ exports.createBooking = async (req, res) => {
       },
       consultant: {
         name: consultant.name,
-        email: consultant.email || process.env.CONTACT_RECEIVER || process.env.SMTP_USER || 'admin@puthuyir.com'
+        email: consultant.email
+      },
+      admin: {
+        name: process.env.DEFAULT_CONSULTANT_NAME || 'Admin'
       },
       preferredDate: appointment_date,
       symptoms: symptoms || 'Not specified',
