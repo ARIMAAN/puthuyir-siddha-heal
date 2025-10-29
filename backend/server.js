@@ -48,6 +48,7 @@ const healthHandler = (req, res) => {
 };
 
 app.get('/health', healthHandler);
+
 app.get('/api/health', healthHandler);
 
 // Handle OPTIONS requests for CORS preflight
