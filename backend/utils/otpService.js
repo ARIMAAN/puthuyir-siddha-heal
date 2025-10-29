@@ -53,27 +53,34 @@ const createOTP = async (email, purpose) => {
 // Verify OTP
 const verifyOTP = async (email, otp, purpose, markAsUsed = true) => {
   try {
+    console.log(`🔐 Verifying OTP for ${email} with purpose: ${purpose}`);
+    
+    // Normalize email to match how it's stored during creation
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Find the most recent, valid, and unused OTP
     const otpDoc = await OTP.findOne({
-      email,
+      email: normalizedEmail,
       otp,
       purpose,
-      expires_at: { $gt: new Date() } // Only check expiration here
-    });
+      is_used: false, // Ensure OTP has not been used
+      expires_at: { $gt: new Date() } // Ensure OTP has not expired
+    }).sort({ created_at: -1 }); // Get the newest one if multiple exist
 
     if (!otpDoc) {
-      throw new Error("Invalid or expired OTP");
+      console.log(`❌ OTP verification failed for ${email}. Reason: Invalid, expired, or already used OTP.`);
+      // To prevent account enumeration attacks, use a generic error message.
+      throw new Error("Invalid or expired OTP. Please request a new one.");
     }
 
-    // Only check if OTP is used when we're about to mark it as used
-    // This allows verification calls (markAsUsed=false) to succeed even if OTP was previously verified
-    if (markAsUsed && otpDoc.is_used) {
-      throw new Error("OTP has already been used");
-    }
+    console.log(`✅ OTP document found with ID: ${otpDoc._id}`);
 
     // Mark as used if requested
     if (markAsUsed) {
+      console.log(`📝 Marking OTP as used...`);
       otpDoc.is_used = true;
       await otpDoc.save();
+      console.log(`✅ OTP successfully marked as used.`);
     }
 
     return true;
