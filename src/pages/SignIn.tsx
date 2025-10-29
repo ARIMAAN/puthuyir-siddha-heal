@@ -239,7 +239,10 @@ const SignIn = () => {
   };
 
   const handleGoogleSignIn = () => {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    let backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    if (backendUrl.endsWith('/')) {
+      backendUrl = backendUrl.slice(0, -1);
+    }
     window.location.href = `${backendUrl}/api/auth/google`;
   };
 
