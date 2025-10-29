@@ -1,7 +1,16 @@
 const MongoStore = require('connect-mongo');
 
-// Allowed origins are read from a comma-separated string in the .env file
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+// Allowed origins are read from environment variables
+const allowedOriginsFromEnv = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+const frontendUrlFromEnv = process.env.FRONTEND_URL;
+
+// Start with origins from ALLOWED_ORIGINS
+const allowedOrigins = [...allowedOriginsFromEnv];
+
+// Add FRONTEND_URL if it exists and isn't already in the list
+if (frontendUrlFromEnv && !allowedOrigins.includes(frontendUrlFromEnv)) {
+  allowedOrigins.push(frontendUrlFromEnv);
+}
 
 // In development, always allow localhost
 const isDevelopment = process.env.NODE_ENV !== 'production';
