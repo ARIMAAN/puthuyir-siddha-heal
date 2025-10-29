@@ -7,11 +7,9 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/auth/(.*)", "dest": "/api/auth/$1" },
-    { "src": "/health", "dest": "/api/health" },
-    { "src": "/", "dest": "/api" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/api/$1" }
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
   ]
 }
