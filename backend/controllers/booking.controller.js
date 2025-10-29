@@ -159,7 +159,7 @@ exports.createBooking = async (req, res) => {
       }
     }
 
-    console.log('✅ Found consultant:', consultant.name);
+    console.log('✅ Found consultant:', consultant.name, 'with email:', consultant.email);
 
     const newBooking = new Booking({
       patient_id: patient._id,
@@ -183,7 +183,7 @@ exports.createBooking = async (req, res) => {
       },
       consultant: {
         name: consultant.name,
-        email: consultant.email
+        email: consultant.email || process.env.CONTACT_RECEIVER || process.env.SMTP_USER
       },
       admin: {
         name: process.env.DEFAULT_CONSULTANT_NAME || 'Admin'
