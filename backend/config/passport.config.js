@@ -3,7 +3,10 @@ const User = require("../models/User");
 const { createOTP, sendOTPEmail } = require("../utils/otpService");
 
 module.exports = function(passport) {
-    const callbackURL = `${process.env.BACKEND_URL}/api/auth/google/callback`;
+    const backendUrl = process.env.BACKEND_URL.endsWith('/')
+      ? process.env.BACKEND_URL.slice(0, -1)
+      : process.env.BACKEND_URL;
+    const callbackURL = `${backendUrl}/api/auth/google/callback`;
 
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
