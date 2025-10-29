@@ -2,8 +2,16 @@ import axios from 'axios';
 import { logout, checkTokenExpiry } from './sessionManager';
 
 // Create axios instance
+const getBaseUrl = () => {
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  return `${url}/api`;
+};
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseUrl(),
   timeout: 30000, // 30 seconds to handle email sending
   withCredentials: true, // Include credentials for CORS
 });
